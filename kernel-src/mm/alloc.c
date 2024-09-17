@@ -65,6 +65,9 @@ void free(void *ptr) {
 }
 
 void *realloc(void *ptr, size_t size) {
+	if (!ptr)
+		return alloc(size);
+
 	size_t *start = ptr;
 	start -= 2;
 	size_t currentsize = *(start + 1);
