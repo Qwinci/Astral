@@ -20,6 +20,7 @@
 #define DEV_MAJOR_MOUSE 11
 #define DEV_MAJOR_PTY 12
 #define DEV_MAJOR_ACPI 13
+#define DEV_MAJOR_OSS 14
 
 typedef struct {
 	int (*open)(int minor, vnode_t **vnode, int flags);
@@ -41,7 +42,10 @@ typedef struct devnode_t {
 	devops_t *devops;
 	vnode_t *physical;
 	struct devnode_t *master;
-	hashtable_t children;
+	union {
+		hashtable_t children;
+		char *link;
+	};
 } devnode_t;
 
 void devfs_init();
@@ -49,6 +53,7 @@ int devfs_getnode(vnode_t *physical, int major, int minor, vnode_t **node);
 int devfs_register(devops_t *devops, char *name, int type, int major, int minor, mode_t mode, cred_t *cred);
 int devfs_getbyname(char *name, vnode_t **ret);
 int devfs_createdir(char *name);
+int devfs_createsymlink(char *destpath, char *linkpath, vattr_t *attr);
 void devfs_remove(char *name, int major, int minor);
 
 #endif

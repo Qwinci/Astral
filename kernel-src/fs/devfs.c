@@ -266,6 +266,25 @@ int devfs_inactive(vnode_t *node) {
 	if (devnode->devops && devnode->devops->inactive)
 		devnode->devops->inactive(devnode->attr.rdevminor);
 
+	__assert(node->refcount == 0);
+	switch (node->type) {
+		case V_TYPE_LINK:
+			if (devnode->link)
+				free(devnode->link);
+			break;
+		case V_TYPE_DIR:
+			__assert(devnode->children.entrycount == 2); // assert that it only has the dot entries
+			// remove refcount of the .. dir
+			void *r = NULL;
+			__assert(hashtable_get(&devnode->children, &r, "..", 2) == 0);
+			vnode_t *pnode = r;
+			VOP_RELEASE(pnode);
+			__assert(hashtable_destroy(&devnode->children) == 0);
+			break;
+		default:
+			break;
+	}
+
 	slab_free(nodecache, node);
 	return 0;
 }
@@ -274,7 +293,7 @@ int devfs_create(vnode_t *parent, char *name, vattr_t *attr, int type, vnode_t *
 	if (parent->type != V_TYPE_DIR)
 		return ENOTDIR;
 
-	if (type != V_TYPE_CHDEV && type != V_TYPE_BLKDEV && type != V_TYPE_DIR)
+	if (type != V_TYPE_CHDEV && type != V_TYPE_BLKDEV && type != V_TYPE_DIR && type != V_TYPE_LINK)
 		return EINVAL;
 
 	devnode_t *parentdevnode = (devnode_t *)parent;
@@ -420,6 +439,105 @@ static int devfs_sync(vnode_t *vnode) {
 	return vmmcache_sync(vnode);
 }
 
+static int devfs_unlink(vnode_t *node, vnode_t *child, char *name, cred_t *cred) {
+	devnode_t *devnode = (devnode_t *)node;
+	if (node->type != V_TYPE_DIR)
+		return ENOTDIR;
+
+	if (node->vfsmounted)
+		return EBUSY;
+
+	size_t namelen = strlen(name);
+	void *r;
+
+	int err = hashtable_get(&devnode->children, &r, name, namelen);
+	if (err) {
+		return err;
+	}
+
+	vnode_t *unlinknode = r;
+	devnode_t *unlinktmpnode = r;
+	__assert(child == unlinknode);
+
+	err = hashtable_remove(&devnode->children, name, namelen);
+	if (err)
+		return err;
+
+	--unlinktmpnode->attr.nlinks;
+	VOP_RELEASE(unlinknode);
+
+	return 0;
+}
+
+static int devfs_link(vnode_t *node, vnode_t *dir, char *name, cred_t *cred) {
+	if (node->vfs != dir->vfs)
+		return EXDEV;
+
+	if (dir->type != V_TYPE_DIR)
+		return ENOTDIR;
+
+	if (node->type == V_TYPE_DIR)
+		return EISDIR;
+
+	devnode_t *devdir = (devnode_t *)dir;
+	size_t namelen = strlen(name);
+	void *v;
+	if (hashtable_get(&devdir->children, &v, name, namelen) == 0)
+		return EEXIST;
+
+	int error = hashtable_set(&devdir->children, node, name, namelen, true);
+	if (error)
+		return error;
+
+	VOP_HOLD(node);
+	devnode_t *devnode = (devnode_t *)node;
+	++devnode->attr.nlinks;
+
+	return 0;
+}
+
+static int devfs_symlink(vnode_t *node, char *name, vattr_t *attr, char *path, cred_t *cred) {
+	if (node->type != V_TYPE_DIR)
+		return ENOTDIR;
+
+	char *pathbuf = alloc(strlen(path) + 1);
+	if (pathbuf == NULL)
+		return ENOMEM;
+
+	strcpy(pathbuf, path);
+
+	vnode_t *linknode = NULL;
+	int err = devfs_create(node, name, attr, V_TYPE_LINK, &linknode, cred);
+	if (err) {
+		free(pathbuf);
+		return err;
+	}
+
+	devnode_t *linkdevnode = (devnode_t *)linknode;
+	linkdevnode->link = pathbuf;
+	// locked by tmpfs_create
+	VOP_UNLOCK(linknode);
+	VOP_RELEASE(linknode);
+
+	return 0;
+}
+
+static int devfs_readlink(vnode_t *node, char **link, cred_t *cred) {
+	if (node->type != V_TYPE_LINK)
+		return EINVAL;
+
+	devnode_t *devnode = (devnode_t *)node;
+
+	char *ret = alloc(strlen(devnode->link) + 1);
+	if (ret == NULL)
+		return ENOMEM;
+
+	strcpy(ret, devnode->link);
+	*link = ret;
+
+	return 0;
+}
+
 // most locking is handled by the devices.
 // we only care about the tree side of things, and each function
 // will have their own handling of the vnode mutex with the
@@ -455,10 +573,10 @@ static vops_t vnops = {
 	.read = devfs_read,
 	.write = devfs_write,
 	.access = devfs_access,
-	.unlink = devfs_enodev,
-	.link = devfs_enodev,
-	.symlink = devfs_enodev,
-	.readlink = devfs_enodev,
+	.unlink = devfs_unlink,
+	.link = devfs_link,
+	.symlink = devfs_symlink,
+	.readlink = devfs_readlink,
 	.inactive = devfs_inactive,
 	.mmap = devfs_mmap,
 	.munmap = devfs_munmap,
@@ -627,4 +745,8 @@ void devfs_remove(char *name, int major, int minor) {
 int devfs_createdir(char *name) {
 	vattr_t attr = {0};
 	return vfs_create((vnode_t *)devfsroot, name, &attr, V_TYPE_DIR, NULL);
+}
+
+int devfs_createsymlink(char *destpath, char *linkpath, vattr_t *attr) {
+	return vfs_link(NULL, destpath, (vnode_t *)devfsroot, linkpath, V_TYPE_LINK, attr);
 }
