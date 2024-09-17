@@ -1,6 +1,7 @@
 CSOURCES= $(shell find -name *.c)
+CXXSOURCES= $(shell find -name *.cpp ! -wholename '*uacpi/*')
 ASMSOURCES= $(shell find -name *.asm)
-OBJS=$(CSOURCES:.c=.o) $(ASMSOURCES:.asm=.asmo)
+OBJS=$(CSOURCES:.c=.o) $(CXXSOURCES:.cpp=.o) $(ASMSOURCES:.asm=.asmo)
 TARGET=x86-64
 INCDIR=$(shell pwd)/include
 ARCHINCDIR=$(shell pwd)/include/$(TARGET)/
@@ -12,10 +13,12 @@ PRINTFOPTS=-DPRINTF_DISABLE_SUPPORT_FLOAT
 FLANTERMINCDIR=$(shell pwd)/flanterm
 UACPIINCDIR=$(shell pwd)/io/acpi/uacpi/include
 UACPIOPTS=-DUACPI_OVERRIDE_LIBC -DUACPI_KERNEL_INITIALIZATION
+UHDAINCDIR=$(shell pwd)/io/audio/uhda/include
 KERNELCONFIG=#-DX86_64_ENABLE_E9 -DSYSCALL_LOGGING
-CFLAGS=-g -ffreestanding -mcmodel=kernel -O2 -mno-red-zone -mgeneral-regs-only -mno-mmx -mno-sse -mno-sse2 -nostdlib -Wall -MMD -I "${INCDIR}" -I "$(ARCHINCDIR)" -I "$(FLANTERMINCDIR)" -I "$(UACPIINCDIR)" $(UACPIOPTS) $(PRINTFOPTS) $(KERNELCONFIG)
+CFLAGS=-g -ffreestanding -mcmodel=kernel -O2 -mno-red-zone -mgeneral-regs-only -mno-mmx -mno-sse -mno-sse2 -nostdlib -Wall -MMD -I "${INCDIR}" -I "$(ARCHINCDIR)" -I "$(FLANTERMINCDIR)" -I "$(UACPIINCDIR)" -I "$(UHDAINCDIR)" $(UACPIOPTS) $(PRINTFOPTS) $(KERNELCONFIG)
+CXXFLAGS=$(CFLAGS) -fno-exceptions -fno-rtti -std=c++20
 ASFLAGS=-felf64
-DEPS=$(CSOURCES:.c=.d)
+DEPS=$(CSOURCES:.c=.d) $(CXXSOURCES:.cpp=.d)
 
 .PHONY: all
 all:
@@ -34,6 +37,10 @@ astral:	$(OBJS)
 %.o: %.c
 	@echo [CC] $@
 	@$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.cpp
+	@echo [CXX] $@
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.asmo: %.asm
 	@echo [AS] $@

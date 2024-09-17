@@ -39,6 +39,8 @@
 #include <kernel/pty.h>
 #include <kernel/vmmcache.h>
 #include <kernel/defaultauth.h>
+#include <kernel/hda.h>
+#include <kernel/oss.h>
 
 static cpu_t bsp_cpu;
 
@@ -100,6 +102,7 @@ void kernel_entry() {
 	tcp_init();
 
 	block_init();
+	oss_init();
 	pseudodevices_init();
 	arch_e9_initdev();
 	keyboard_init();
@@ -107,6 +110,7 @@ void kernel_entry() {
 	arch_ps2_init();
 	fb_init();
 	nvme_init();
+	hda_init();
 	virtio_init();
 	console_init();
 	logging_sethook(console_putc);
