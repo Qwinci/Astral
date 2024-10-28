@@ -37,15 +37,13 @@ static timekeeper_source_info_t *tsc_init(void) {
 	if (hz)
 		goto leave;
 
-	bool need_calibration = false;
+	bool need_calibration = true;
 	if (cpuid_base_max_leaf() >= 0x15) {
 		cpuid_results_t cpuid_results;
 		cpuid(0x15, &cpuid_results);
 
-		if (cpuid_results.eax == 0 || cpuid_results.ebx == 0 || cpuid_results.ecx == 0) {
-			need_calibration = true;
+		if (cpuid_results.eax == 0 || cpuid_results.ebx == 0 || cpuid_results.ecx == 0)
 			goto calibrate;
-		}
 
 		uint64_t core_frequency = cpuid_results.ecx;
 		uint64_t core_numerator = cpuid_results.ebx;
@@ -53,6 +51,7 @@ static timekeeper_source_info_t *tsc_init(void) {
 
 		uint64_t tsc_frequency = core_frequency * core_numerator / core_denominator;
 		hz = tsc_frequency;
+		need_calibration = false;
 	}
 
 	calibrate:
