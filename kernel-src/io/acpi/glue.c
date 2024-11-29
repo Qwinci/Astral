@@ -259,9 +259,8 @@ uacpi_status uacpi_kernel_pci_write(uacpi_pci_address *address, uacpi_size offse
 	return UACPI_STATUS_OK;
 }
 
-uacpi_u64 uacpi_kernel_get_ticks(void) {
-	// uACPI expects ticks in hundreds of nanoseconds
-	return timespec_ns(timekeeper_timefromboot()) / 100;
+uacpi_u64 uacpi_kernel_get_nanoseconds_since_boot(void) {
+	return timespec_ns(timekeeper_timefromboot());
 }
 
 void uacpi_kernel_stall(uacpi_u8 usec) {
@@ -455,14 +454,15 @@ void uacpi_kernel_free_mutex(uacpi_handle mut) {
 	uacpi_kernel_free(mut);
 }
 
-uacpi_bool uacpi_kernel_acquire_mutex(
+uacpi_status uacpi_kernel_acquire_mutex(
 	uacpi_handle mut, uacpi_u16 timeout) {
 	if (timeout == 0xFFFF) {
 		MUTEX_ACQUIRE(mut, true);
-		return UACPI_TRUE;
+		return UACPI_STATUS_OK;
 	}
 
-	return MUTEX_ACQUIRE_TIMED(mut, timeout * 1000, true);
+	bool didacquire = MUTEX_ACQUIRE_TIMED(mut, timeout * 1000, true);
+	return didacquire ? UACPI_STATUS_OK : UACPI_STATUS_TIMEOUT;
 }
 
 void uacpi_kernel_release_mutex(uacpi_handle mut) {
