@@ -1,12 +1,15 @@
 name=freetype
 revision=1
 from_source=freetype
-imagedeps="gcc"
+imagedeps="gcc build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --enable-shared --disable-static
+}
+
+build() {
 	make -j${parallelism}
 }
 

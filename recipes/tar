@@ -1,13 +1,16 @@
 name=tar
 revision=1
 from_source=tar
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils pkgconfig libtool"
 deps="base bzip2 zlib gzip"
 
-build() {
+configure() {
 	cp -rpf ${source_dir}/* .
 	LDFLAGS="${LDFLAGS} -lintl -liconv" ./configure --host=x86_64-astral --prefix=${prefix}
+}
+
+build() {
 	make -j ${parallelism}
 }
 

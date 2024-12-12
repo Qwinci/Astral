@@ -5,8 +5,11 @@ imagedeps="gcc"
 hostdeps="xgcc xbinutils"
 deps="base zlib bzip2"
 
-build() {
+configure() {
 	${source_dir}/configure --host=x86_64-astral --prefix=${prefix} --docdir=/usr/share/doc/pcre2-10.42 --enable-pcre2-16 --enable-pcre2-32 --enable-pcre2grep-libz --enable-pcre2grep-libbz2 --disable-static
+}
+
+build() {
 	make -j ${parallelism}
 }
 

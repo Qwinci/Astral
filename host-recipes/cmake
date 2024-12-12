@@ -1,10 +1,13 @@
 name=cmake
 revision=1
 from_source=cmake
-imagedeps="gcc"
+imagedeps="gcc build-essential libssl-dev"
+
+configure() {
+	${source_dir}/configure --prefix=${prefix} --parallel=${parallelism}
+}
 
 build() {
-	${source_dir}/configure --prefix=${prefix} --parallel=${parallelism}
 	make -j${parallelism}
 }
 

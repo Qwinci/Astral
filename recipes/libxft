@@ -1,7 +1,7 @@
 name=libxft
 revision=1
 from_source=libxft
-imagedeps="meson ninja base-devel"
+imagedeps="meson build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base libx11 libxt libxrender freetype fontconfig"
 

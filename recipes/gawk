@@ -1,11 +1,11 @@
 name=gawk
 revision=1
 from_source=gawk
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base"
 
-build() {
+configure() {
 	cp -rp ${source_dir}/* .
 	./configure --host=x86_64-astral --prefix=${prefix} --disable-nls --disable-extensions
 
@@ -15,7 +15,9 @@ build() {
 	echo "	echo ignore" >> test/Makefile
 	echo "install:" >> test/Makefile
 	echo "	echo ignore" >> test/Makefile
+}
 
+build() {
 	make -j ${parallelism}
 }
 

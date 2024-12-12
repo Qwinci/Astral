@@ -1,12 +1,15 @@
 name=xfontalias
 revision=1
 from_source=xfontalias
-imagedeps="gcc xorg-mkfontscale"
+imagedeps="gcc xfonts-base"
 hostdeps="xgcc xbinutils pkgconfig util-macros fontutil"
 deps="base"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral
+}
+
+build() {
 	make -j${parallelism}
 }
 

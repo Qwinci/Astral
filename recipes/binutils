@@ -1,12 +1,15 @@
 name=binutils
 revision=1
 from_source=binutils
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils automake autoconf"
 deps="base"
 
-build() {
+configure() {
 	${source_dir}/configure --host=x86_64-astral --target=x86_64-astral --prefix=${prefix} --program-prefix=x86_64-astral- --disable-werror
+}
+
+build() {
 	make -j${parallelism} tooldir=/usr
 }
 

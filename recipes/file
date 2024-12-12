@@ -1,13 +1,16 @@
 name=file
 revision=1
 from_source=file
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base"
 
-build() {
+configure() {
 	cp -rp ${source_dir}/* .
 	./configure --host=x86_64-astral --prefix=${prefix}
+}
+
+build() {
 	make -j ${parallelism}
 }
 

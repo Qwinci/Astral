@@ -5,7 +5,7 @@ allow_network="yes"
 imagedeps="wget"
 flanterm_commit="347d9cf1e3fced64aa20ab278e2fdcc834086035"
 
-regenerate() {
+prepare() {
 	rm -f include/limine.h
 	rm -f io/printf.c
 	rm -f include/printf.h

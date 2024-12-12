@@ -2,6 +2,6 @@ name=mount
 version=0
 source_dir="tools/netd"
 
-regenerate() {
+prepare() {
 	true
 }

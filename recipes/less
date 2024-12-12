@@ -1,12 +1,15 @@
 name=less
 revision=1
 from_source=less
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base ncurses"
 
-build() {
+configure() {
 	${source_dir}/configure --host=x86_64-astral --prefix=${prefix}
+}
+
+build() {
 	make -j ${parallelism} #LDFLAGS='-ltinfo'
 }
 

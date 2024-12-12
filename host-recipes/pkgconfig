@@ -1,16 +1,17 @@
 name=pkgconfig
 revision=1
 from_source=pkgconfig
-imagedeps="gcc base-devel"
+imagedeps="gcc build-essential automake autoconf libtool"
 
+configure() {
+	${source_dir}/configure --prefix=${prefix}
+}
 
 build() {
-	${source_dir}/configure --prefix=${prefix}
 	make -j${parallelism}
 }
 
 package() {
-
 	make install DESTDIR="${dest_dir}"
 	mkdir -p ${dest_dir}${prefix}/share/pkgconfig/personality.d
 	
@@ -23,6 +24,5 @@ SystemLibraryPaths: ${sysroot_dir}/usr/lib
 EOF
 
 	ln -s pkgconf ${dest_dir}${prefix}/bin/x86_64-astral-pkg-config
-
+	ln -s pkgconf ${dest_dir}${prefix}/bin/pkg-config
 }
-

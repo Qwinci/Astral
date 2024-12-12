@@ -1,7 +1,7 @@
 name=libstdc++-v3
 revision=1
 from_source=gcc
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="automake autoconf xbinutils xgcc"
 deps="mlibc"
 

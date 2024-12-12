@@ -1,12 +1,14 @@
 name=fontutil
 revision=1
 from_source=fontutil
-imagedeps="gcc"
+imagedeps="gcc build-essential"
 hostdeps="xgcc xbinutils pkgconfig util-macros xorgproto"
 
+configure() {
+	${source_dir}/configure --prefix=${prefix}
+}
 
 build() {
-	${source_dir}/configure --prefix=${prefix}
 	make -j${parallelism}
 }
 

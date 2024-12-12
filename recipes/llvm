@@ -1,11 +1,11 @@
 name=llvm
 revision=1
 from_source=llvm
-imagedeps="meson ninja base-devel"
+imagedeps="meson ninja-build build-essential"
 hostdeps="xgcc xbinutils pkgconfig cmake libstdc++-v3"
 deps="base ncurses zlib"
 
-build() {
+configure() {
 	cmake \
 	-GNinja \
 	-DCMAKE_TOOLCHAIN_FILE=${base_dir}/util/cmake \
@@ -20,7 +20,9 @@ build() {
 	-DLLVM_TARGETS_TO_BUILD="X86" \
 	-Wno-dev \
 	${source_dir}/llvm
+}
 
+build() {
 	ninja -j${parallelism}
 }
 

@@ -3,6 +3,6 @@ version=1.20.0
 source_method=tarball
 tarball_url="https://www.x.org/pub/individual/util/util-macros-${version}.tar.xz"
 tarball_sha512="76caefb118bf1675d7b2b96e1bbb04eb9a320b02e120839e55a22ef98538ecf00d0e686a67186fc8fdc8492d277ffe3125ae8b7ac61ce4739edc0de3f468d2eb"
-regenerate() {
+prepare() {
         true
 }

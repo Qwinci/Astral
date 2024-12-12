@@ -1,12 +1,15 @@
 name=libxdamage
 revision=1
 from_source=libxdamage
-imagedeps="meson ninja base-devel"
+imagedeps="meson ninja-build build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base libx11 libxfixes"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --enable-shared --disable-static --disable-malloc0returnsnull
+}
+
+build() {
 	make -j${parallelism}
 }
 

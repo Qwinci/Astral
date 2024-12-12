@@ -4,6 +4,6 @@ source_method=tarball
 tarball_url="https://github.com/managarm/frigg/archive/${version}.tar.gz"
 tarball_sha512=d7011bcb0b2adfe88968de7cf9080fc71664725784491e66266b34b7fd83c2e3005f8ba7b530116075a7f5f7b31103af9aef1b32dab3143ed9ae3a247d2aa655
 
-regenerate() {
+prepare() {
 	true
 }

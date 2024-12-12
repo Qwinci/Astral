@@ -1,13 +1,16 @@
 name=gzip
 revision=1
 from_source=gzip
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils automake autoconf"
 deps="base"
 
-build() {
+configure() {
 	cp -rf ${source_dir}/* .
 	./configure --host=x86_64-astral --prefix=${prefix}
+}
+
+build() {
 	make -j ${parallelism}
 }
 

@@ -1,12 +1,15 @@
 name=sudo
 revision=1
 from_source=sudo
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base libxcrypt"
 
-build() {
+configure() {
 	${source_dir}/configure --host=x86_64-astral --prefix=${prefix} --with-secure-path --with-env-editor --with-passprompt="[sudo] password for %p: " --disable-nls
+}
+
+build() {
 	make -j ${parallelism}
 }
 

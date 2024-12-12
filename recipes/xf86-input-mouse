@@ -5,8 +5,11 @@ imagedeps="gcc"
 hostdeps="xgcc xbinutils pkgconfig automake autoconf util-macros libtool"
 deps="base xorg-server"
 
-build() {
+configure() {
 	SYSROOT=${sysroot_dir} ${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --disable-static
+}
+
+build() {
 	make -j${parallelism}
 }
 

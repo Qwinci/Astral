@@ -2,6 +2,6 @@ name=distro-files
 version=0
 source_dir="distro-files"
 
-regenerate() {
+prepare() {
 	true
 }

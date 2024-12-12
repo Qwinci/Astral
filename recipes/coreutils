@@ -1,13 +1,16 @@
 name=coreutils
 revision=1
 from_source=coreutils
-imagedeps="base-devel gperf"
+imagedeps="build-essential gperf"
 hostdeps="xgcc xbinutils"
 deps="base"
 
-build() {
+configure() {
 	cp -pr ${source_dir}/* .
 	CFLAGS="-DSLOW_BUT_NO_HACKS $CFLAGS" ./configure --host=x86_64-astral --prefix=${prefix}
+}
+
+build() {
 	make -j ${parallelism}
 }
 

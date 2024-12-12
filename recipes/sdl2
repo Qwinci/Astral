@@ -1,11 +1,11 @@
 name=sdl2
 revision=1
 from_source=sdl2
-imagedeps="meson ninja base-devel"
+imagedeps="meson ninja-build build-essential"
 hostdeps="xgcc xbinutils pkgconfig cmake libstdc++-v3"
 deps="base libx11 libxext libxcursor libxinerama libxi libxfixes libxrandr libxrender libxxf86vm mesa libiconv"
 
-build() {
+configure() {
 	cmake \
 	-GNinja \
 	-DCMAKE_TOOLCHAIN_FILE=${base_dir}/util/cmake \
@@ -44,7 +44,9 @@ build() {
 	-DSDL_SHARED=ON \
 	-DSDL_STATIC=OFF \
 	${source_dir}
+}
 
+build() {
 	ninja -j${parallelism}
 }
 

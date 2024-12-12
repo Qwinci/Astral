@@ -1,10 +1,13 @@
 name=python
 from_source=python
 revision=1
-imagedeps="base-devel"
+imagedeps="build-essential"
+
+configure() {
+	"${source_dir}/configure" --prefix=${prefix}
+}
 
 build() {
-	"${source_dir}/configure" --prefix=${prefix}
 	make -j${parallelism}
 }
 

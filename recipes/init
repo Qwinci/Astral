@@ -1,7 +1,7 @@
 name=init
 revision=1
 from_source=init
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xbinutils xgcc"
 deps="base"
 

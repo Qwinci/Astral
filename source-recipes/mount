@@ -2,6 +2,6 @@ name=mount
 version=0
 source_dir="tools/mount"
 
-regenerate() {
+prepare() {
 	true
 }

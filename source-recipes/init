@@ -2,6 +2,6 @@ name=init
 version=0
 source_dir="tools/init"
 
-regenerate() {
+prepare() {
 	true
 }

@@ -1,12 +1,15 @@
 name=libxxf86vm
 revision=1
 from_source=libxxf86vm
-imagedeps="meson ninja base-devel"
+imagedeps="meson ninja-build build-essential"
 hostdeps="xgcc xbinutils pkgconfig util-macros"
 deps="base libxext xorgproto"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --enable-shared --disable-static --disable-malloc0returnsnull
+}
+
+build() {
 	make -j${parallelism}
 }
 

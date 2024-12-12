@@ -2,18 +2,18 @@ name=libtool
 revision=1
 from_source=libtool
 hostdeps="autoconf automake"
-imagedeps="gcc help2man"
+imagedeps="gcc build-essential help2man"
+
+configure() {
+	cp -pr ${source_dir}/* .
+	./configure --prefix=${prefix}
+}
 
 build() {
-	cp -pr ${source_dir}/* .
-	./configure --prefix=${prefix}	
 	make -j${parallelism}
-
 }
 
 package() {
-
 	make install DESTDIR="${dest_dir}"
-
 }
 

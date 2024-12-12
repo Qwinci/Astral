@@ -1,11 +1,14 @@
 name=xorgproto
 revision=1
 from_source=xorgproto
-imagedeps="meson ninja gcc"
+imagedeps="meson ninja-build gcc build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 
-build() {
+configure() {
 	meson --prefix=${prefix} -Dlegacy=true ${source_dir}
+}
+
+build() {
 	ninja
 }
 

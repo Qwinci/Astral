@@ -1,7 +1,7 @@
 name=xneko
 revision=1
 from_source=xneko
-imagedeps="meson ninja base-devel"
+imagedeps="meson ninja-build build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base libx11"
 

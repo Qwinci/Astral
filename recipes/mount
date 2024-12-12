@@ -1,7 +1,7 @@
 name=mount
 revision=1
 from_source=mount
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xbinutils xgcc"
 deps="base"
 

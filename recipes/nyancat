@@ -1,7 +1,7 @@
 name=nyancat
 revision=1
 from_source=nyancat
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base"
 

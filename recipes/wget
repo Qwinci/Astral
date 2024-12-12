@@ -1,13 +1,16 @@
 name=wget
 revision=1
 from_source=wget
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base zlib pcre2 openssl"
 
-build() {
+configure() {
 	cp -rpv ${source_dir}/* .
 	./configure --host=x86_64-astral --prefix=${prefix} --without-libpsl --with-ssl=openssl --disable-ipv6
+}
+
+build() {
 	make -j ${parallelism}
 }
 

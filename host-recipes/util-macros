@@ -1,9 +1,13 @@
 name=util-macros
 revision=1
 from_source=util-macros
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base"
+
+configure() {
+	${source_dir}/configure --host=x86_64-astral --prefix=${prefix}
+}
 
 
 build() {

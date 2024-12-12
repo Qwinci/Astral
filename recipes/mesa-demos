@@ -1,13 +1,15 @@
 name=mesa-demos
 revision=1
 from_source=mesa-demos
-imagedeps="gcc meson ninja"
+imagedeps="gcc meson ninja-build"
 hostdeps="xgcc xbinutils pkgconfig libtool"
 deps="base mesa freetype libx11 libxext glu"
 
-build() {
+configure() {
 	meson setup --cross-file ${base_dir}/util/crossfile --prefix=${prefix} --buildtype=release ${source_dir} -Dx11=enabled -Dwith-system-data-files=true
+}
 
+build() {
 	ninja -j${parallelism}
 }
 

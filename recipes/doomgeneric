@@ -1,7 +1,7 @@
 name=doomgeneric
 revision=1
 from_source=doomgeneric
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base"
 

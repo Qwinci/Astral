@@ -1,12 +1,15 @@
 name=libexpat
 revision=1
 from_source=libexpat
-imagedeps="base-devel python3"
+imagedeps="build-essential python3"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base"
 
-build() {
+configure() {	
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --enable-shared --disable-static
+}
+
+build() {
 	make -j${parallelism}
 }
 

@@ -3,8 +3,11 @@ revision=1
 from_source=autoconf-archive
 imagedeps="gcc"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix}
+}
+
+build() {
 	make -j${parallelism}
 }
 

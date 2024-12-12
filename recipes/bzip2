@@ -1,7 +1,7 @@
 name=bzip2
 revision=1
 from_source=bzip2
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base"
 

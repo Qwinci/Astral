@@ -5,8 +5,11 @@ imagedeps="gcc"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base libxrender libxfixes libx11"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral
+}
+
+build() {
 	make -j${parallelism}
 }
 

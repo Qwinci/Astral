@@ -1,12 +1,15 @@
 name=libgpg-error
 revision=1
 from_source=libgpg-error
-imagedeps="gcc"
+imagedeps="gcc build-essential"
 hostdeps="xgcc xbinutils pkgconfig libtool"
 deps="mlibc"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --enable-shared --disable-static
+}
+
+build() {
 	make -j${parallelism}
 }
 

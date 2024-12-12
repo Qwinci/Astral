@@ -1,13 +1,16 @@
 name=curl
 revision=1
 from_source=curl
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base openssl zlib"
 
-build() {
+configure() {
 	cp -rpv ${source_dir}/* .
 	./configure --host=x86_64-astral --prefix=${prefix} --with-openssl --with-zlib --disable-ipv6 --with-ca-path=/etc/ssl/certs --disable-static
+}
+
+build() {
 	make -j ${parallelism}
 }
 

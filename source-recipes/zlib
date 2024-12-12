@@ -5,6 +5,6 @@ tarball_url="https://github.com/madler/zlib/releases/download/v${version}/zlib-$
 tarball_sha512=3868ac4da5842dd36c9dad794930675b9082ce15cbd099ddb79c0f6bd20a24aa8f33a123f378f26fe0ae02d91f31f2994dccaac565cedeaffed7b315e6ded2a2
 hostdeps="autoconf automake libtool pkgconfig"
 
-regenerate() {
+prepare() {
 	true
 }

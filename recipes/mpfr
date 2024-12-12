@@ -1,13 +1,16 @@
 name=mpfr
 revision=1
 from_source=mpfr
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base gmp"
 
-build() {
+configure() {
 	cp -pr ${source_dir}/* .
 	./configure --host=x86_64-astral --prefix=${prefix}
+}
+
+build() {
 	make -j${parallelism}
 }
 

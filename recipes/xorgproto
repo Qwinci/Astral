@@ -1,12 +1,15 @@
 name=xorgproto
 revision=1
 from_source=xorgproto
-imagedeps="meson ninja gcc"
+imagedeps="meson ninja-build gcc build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base"
 
-build() {
+configure() {
 	meson --cross-file=${base_dir}/util/crossfile --prefix=${prefix} -Dlegacy=true ${source_dir}
+}
+
+build() {
 	ninja
 }
 

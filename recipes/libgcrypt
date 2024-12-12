@@ -1,17 +1,20 @@
 name=libgcrypt
 revision=1
 from_source=libgcrypt
-imagedeps="meson ninja gcc"
+imagedeps="meson ninja-build gcc build-essential"
 hostdeps="xgcc xbinutils pkgconfig libtool"
 deps="base libgpg-error"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral \
         --enable-shared \
         --disable-doc \
         --disable-dev-random \
         --disable-asm \
         --with-libgpg-error-prefix=${sysroot_dir}/${prefix}
+}
+
+build() {
 	make -j${parallelism}
 }
 

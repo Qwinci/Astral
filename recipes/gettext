@@ -1,14 +1,17 @@
 name=gettext
 revision=1
 from_source=gettext
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils autoconf automake pkgconfig libtool"
 deps="base libiconv"
 
-build() {
+configure() {
 	cp -rp ${source_dir}/* .
 
 	ACLOCAL=true AUTCONF=true AUTOMAKE=true AUTOHEADER=true ./configure --host=x86_64-astral --prefix=${prefix} --disable-static
+}
+
+build() {
 	make -j ${parallelism}
 }
 

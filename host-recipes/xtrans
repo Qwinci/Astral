@@ -1,12 +1,15 @@
 name=xtrans
 revision=1
 from_source=xtrans
-imagedeps="meson ninja gcc"
+imagedeps="meson ninja-build gcc build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix}
+}
+
+build() {
 	make -j${parallelism}
 }
 

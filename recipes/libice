@@ -1,13 +1,15 @@
 name=libice
 revision=1
 from_source=libice
-imagedeps="meson ninja base-devel"
+imagedeps="meson build-essential"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base libx11"
 
+configure() {
+	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --enable-shared --disable-static
+}
 
 build() {
-	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --enable-shared --disable-static
 	make -j${parallelism}
 }
 

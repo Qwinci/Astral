@@ -1,12 +1,15 @@
 name=ace-of-penguins
 revision=1
 from_source=ace-of-penguins
-imagedeps="meson ninja base-devel libpng"
+imagedeps="meson build-essential libpng-dev"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base libx11 libxpm libpng zlib"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral
+}
+
+build() {
 	make -j${parallelism}
 }
 

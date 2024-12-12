@@ -5,9 +5,12 @@ imagedeps="gcc"
 hostdeps="xgcc xbinutils"
 deps="base zlib"
 
-build() {
+configure() {
 	cp -rpv ${source_dir}/* .
 	CC=x86_64-astral-gcc CXX=x86_64-astral-gcc ./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib "x86_64-astral" shared zlib-dynamic no-afalgeng
+}
+
+build() {
 	make -j ${parallelism}
 }
 

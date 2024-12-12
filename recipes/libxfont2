@@ -1,12 +1,15 @@
 name=libxfont2
 revision=1
 from_source=libxfont2
-imagedeps="meson ninja gcc"
+imagedeps="meson ninja-build gcc"
 hostdeps="xgcc xbinutils pkgconfig"
 deps="base xorgproto freetype zlib xtrans libfontenc"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral --disable-malloc0returnsnull
+}
+
+build() {
 	make -j${parallelism}
 }
 

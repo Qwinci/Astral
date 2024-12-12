@@ -1,12 +1,15 @@
 name=zlib
 revision=1
 from_source=zlib
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xgcc xbinutils"
 deps="base"
 
-build() {
+configure() {
 	CHOST=x86_64-astral prefix=${prefix} ${source_dir}/configure
+}
+
+build() {
 	make -j${parallelism}
 }
 

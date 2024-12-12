@@ -1,7 +1,7 @@
 name=xbitmaps
 revision=1
 from_source=xbitmaps
-imagedeps="meson base-devel"
+imagedeps="meson build-essential"
 hostdeps="xgcc xbinutils pkgconfig util-macros"
 deps="base"
 

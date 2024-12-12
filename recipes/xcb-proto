@@ -1,12 +1,15 @@
 name=xcb-proto
 revision=1
 from_source=xcb-proto
-imagedeps="base-devel python3"
+imagedeps="build-essential python3"
 hostdeps="xgcc xbinutils"
 deps="base"
 
-build() {
+configure() {
 	PYTHON=python3 ${source_dir}/configure --host=x86_64-astral --prefix=${prefix}
+}
+
+build() {
 	make -j ${parallelism}
 }
 

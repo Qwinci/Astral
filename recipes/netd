@@ -1,7 +1,7 @@
 name=netd
 revision=1
 from_source=netd
-imagedeps="base-devel"
+imagedeps="build-essential"
 hostdeps="xbinutils xgcc"
 deps="base"
 

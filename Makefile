@@ -20,7 +20,6 @@ all: jinx
 	git submodule update --init --recursive
 	mkdir -p $(ISODIR)
 	make kernel
-	make build-$(DISTROTYPE)
 	make $(ISO)
 	@echo
 	@echo "|--------------------------------------------------------------|"
@@ -31,7 +30,7 @@ all: jinx
 	@echo
 
 jinx:
-	curl https://raw.githubusercontent.com/mintsuki/jinx/99d8151ca5f849e48c38cbe1a232c6a7a1dbc681/jinx > jinx
+	curl https://raw.githubusercontent.com/mintsuki/jinx/f459adb138abff6afc7936f5fd4bc9e24023a495/jinx > jinx
 	chmod +x jinx
 
 iso: $(ISO)
@@ -53,12 +52,6 @@ $(IMG): limine.conf liminebg.bmp $(KERNEL) $(INITRD)-$(DISTROTYPE)
 
 # ------ build targets ------
 
-build-full:
-	./jinx build-all
-
-build-minimal:
-	./jinx build $(MINIMALPACKAGES)
-
 kernel:
 	rm -f builds/astral.packaged
 	rm -f builds/astral.built
@@ -67,7 +60,7 @@ kernel:
 # ------ initrd targets ------
 
 $(INITRD)-full:
-	./jinx sysroot
+	./jinx install sysroot \*
 	mkdir -p initrds
 	./geninitrd.sh sysroot $(INITRD)-full
 
@@ -101,8 +94,13 @@ clean-kernel:
 
 clean:
 	make -i clean-kernel
-	./jinx clean
 	rm jinx
+	rm -rf builds
+	rm -rf host-builds
+	rm -rf pkgs
+	rm -rf host-pkgs
+	rm -rf sources
+	rm -rf sysroot
 	rm -rf $(ISODIR)
 	rm -f $(ISO)
 	rm -f $(DISKNAME)

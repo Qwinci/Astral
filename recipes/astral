@@ -1,7 +1,7 @@
 name=astral
 revision=1
 from_source=astral
-imagedeps="base-devel nasm"
+imagedeps="build-essential nasm"
 hostdeps="xgcc xbinutils limine"
 
 build() {

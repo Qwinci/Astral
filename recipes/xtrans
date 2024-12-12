@@ -1,12 +1,15 @@
 name=xtrans
 revision=1
 from_source=xtrans
-imagedeps="meson ninja gcc"
+imagedeps="meson ninja-build gcc"
 hostdeps="xgcc xbinutils pkgconfig util-macros"
 deps="base"
 
-build() {
+configure() {
 	${source_dir}/configure --prefix=${prefix} --host=x86_64-astral 
+}
+
+build() {
 	make -j${parallelism}
 }
 

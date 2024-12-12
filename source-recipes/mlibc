@@ -4,6 +4,6 @@ source_method=tarball
 tarball_url="https://github.com/managarm/mlibc/archive/${version}.tar.gz"
 tarball_sha512="df6fccb461ca84f4628568f0555e3f09f3234ea39766df3c09f39e0e9f3277356473d3cd9d67f09e9aacc69e607f3e0db63331321bb83a375e20ab3b37c61451"
 
-regenerate() {
+prepare() {
 	true
 }

@@ -1,12 +1,15 @@
 name=xgcc
 revision=1
 from_source=gcc
-imagedeps="base-devel"
+imagedeps="build-essential libmpfr-dev libmpc-dev libgmp-dev"
 hostdeps="automake autoconf xbinutils pkgconfig"
 deps="mlibc-headers"
 
-build() {
+configure() {
 	${source_dir}/configure --target=x86_64-astral --prefix=${prefix} --with-sysroot=${sysroot_dir} --enable-languages=c,c++ -enable-threads=posix --disable-multilib --enable-shared --enable-host-shared --with-pic
+}
+
+build() {
 	make all-gcc all-target-libgcc -j ${parallelism}
 }
 

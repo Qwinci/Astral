@@ -2,10 +2,13 @@ name=frigg
 from_source=frigg
 revision=1
 hostdeps="xgcc xbinutils pkgconfig"
-imagedeps="meson ninja base-devel"
+imagedeps="meson ninja-build build-essential"
+
+configure() {
+        meson --cross-file ${base_dir}/util/crossfile --prefix=${prefix} -Dbuild_tests=disabled ${source_dir} --includedir="share/mlibc-build/frigg/include"
+}
 
 build() {
-        meson --cross-file ${base_dir}/util/crossfile --prefix=${prefix} -Dbuild_tests=disabled ${source_dir} --includedir="share/mlibc-build/frigg/include"
         ninja
 }
 
