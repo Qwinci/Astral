@@ -20,5 +20,6 @@ package() {
 	mkdir -p ${dest_dir}/bin
 	pushd ${dest_dir}/bin
 	ln -sv ${prefix}/bin/bash sh
+	ln -sv ${prefix}/bin/bash bash
 	popd
 }

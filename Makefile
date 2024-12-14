@@ -78,7 +78,7 @@ initrd:
 disk: disk-$(DISTROTYPE)
 
 disk-full:
-	./jinx sysroot
+	./jinx install sysroot \*
 	./gendisk.sh 4g sysroot $(DISKNAME)
 
 disk-minimal:
