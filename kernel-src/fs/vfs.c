@@ -708,20 +708,8 @@ int vfs_lookup(vnode_t **result, vnode_t *start, char *path, char *lastcomp, int
 
 	size_t pathlen = strlen(path);
 
-	if (pathlen == 0) {
-		if (flags & VFS_LOOKUP_PARENT) {
-			return ENOENT;
-		}
-
-		vnode_t *r = start;
-		int e = highestnodeinmp(start, &r);
-		if (e)
-			return e;
-
-		VOP_HOLD(r);
-		*result = r;
-		return 0;
-	}
+	if (pathlen == 0)
+		return ENOENT;
 
 	if (pathlen > PATHNAME_MAX)
 		return ENAMETOOLONG;
@@ -744,6 +732,7 @@ int vfs_lookup(vnode_t **result, vnode_t *start, char *path, char *lastcomp, int
 
 	vnode_t *next;
 	error = 0;
+
 	VOP_HOLD(current);
 	VOP_LOCK(current);
 
