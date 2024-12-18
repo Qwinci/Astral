@@ -264,8 +264,7 @@ uacpi_u64 uacpi_kernel_get_nanoseconds_since_boot(void) {
 }
 
 void uacpi_kernel_stall(uacpi_u8 usec) {
-	timespec_t start = timekeeper_timefromboot();
-	while (timespec_diffus(start, timekeeper_timefromboot()) < usec) CPU_PAUSE();
+	timekeeper_wait_us(usec);
 }
 
 void uacpi_kernel_sleep(uacpi_u64 msec) {
@@ -354,10 +353,11 @@ static void acpi_dowork(struct acpi_workctx *ctx) {
 }
 
 static void acpi_dogpework() {
-	sched_target_cpu(get_bsp());
-	sched_yield();
+	sched_reschedule_on_cpu(get_bsp(), true);
 
 	acpi_dowork(&gpework);
+
+	sched_target_cpu(NULL);
 }
 
 static void acpi_donotifywork() {
