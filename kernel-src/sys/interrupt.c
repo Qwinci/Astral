@@ -171,9 +171,6 @@ long interrupt_loweripl(long ipl) {
 		current_cpu()->ipl = ipl;
 	interrupt_set(oldintstatus);
 
-	if (oldintstatus)
-		DOPENDING_SAVE();
-
 	return oldipl;
 }
 
@@ -195,8 +192,9 @@ bool interrupt_set(bool status) {
 	current_cpu()->intstatus = status;
 
 	if (status) {
+		if (current_cpu()->isrqueue)
+			DOPENDING_SAVE();
 		arch_interrupt_enable();
-		DOPENDING_SAVE();
 	}
 
 	return old;
