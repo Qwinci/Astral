@@ -457,11 +457,11 @@ void uacpi_kernel_free_mutex(uacpi_handle mut) {
 uacpi_status uacpi_kernel_acquire_mutex(
 	uacpi_handle mut, uacpi_u16 timeout) {
 	if (timeout == 0xFFFF) {
-		MUTEX_ACQUIRE(mut, true);
+		MUTEX_ACQUIRE(mut, false);
 		return UACPI_STATUS_OK;
 	}
 
-	bool didacquire = MUTEX_ACQUIRE_TIMED(mut, timeout * 1000, true);
+	bool didacquire = MUTEX_ACQUIRE_TIMED(mut, timeout * 1000, false);
 	return didacquire ? UACPI_STATUS_OK : UACPI_STATUS_TIMEOUT;
 }
 

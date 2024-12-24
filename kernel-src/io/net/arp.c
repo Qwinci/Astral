@@ -266,7 +266,7 @@ int arp_lookup(netdev_t *netdev, uint32_t ip, mac_t *mac) {
 
 		MUTEX_RELEASE(&cachelock);
 		int timedout = EVENT_WAIT(&eventlistener, to);
-		MUTEX_ACQUIRE(&cachelock, true);
+		MUTEX_ACQUIRE(&cachelock, false);
 		time = timekeeper_time();
 
 		if (get(netdev, ip, mac) == 0) {
