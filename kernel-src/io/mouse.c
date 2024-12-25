@@ -49,7 +49,7 @@ static mutex_t tablelock;
 
 static mouse_t* getmouse(int mouse) {
 	void *mousep = NULL;
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 	hashtable_get(&mousetable, &mousep, &mouse, sizeof(mouse));
 	MUTEX_RELEASE(&tablelock);
 	return mousep;
@@ -78,7 +78,7 @@ static int read(int minor, iovec_iterator_t *iovec_iterator, size_t size, uintma
 	if (packetcount == 0)
 		return error;
 
-	MUTEX_ACQUIRE(&mouse->readmutex, false);
+	MUTEX_ACQUIRE(&mouse->readmutex);
 	// wait until there is data to read or return if nonblock
 	for (;;) {
 		polldesc_t desc = {0};
@@ -140,7 +140,7 @@ static int poll(int minor, polldata_t *data, int events) {
 	if (mouse == NULL)
 		return POLLERR;
 
-	MUTEX_ACQUIRE(&mouse->readmutex, false);
+	MUTEX_ACQUIRE(&mouse->readmutex);
 
 	long ipl = interrupt_raiseipl(IPL_MOUSE);
 	spinlock_acquire(&mouse->lock);
@@ -163,7 +163,7 @@ mouse_t *mouse_new() {
 	if (mouse == NULL)
 		return NULL;
 
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 
 	if (hashtable_set(&mousetable, mouse, &currentnum, sizeof(currentnum), true)) {
 		MUTEX_RELEASE(&tablelock);

@@ -329,7 +329,7 @@ static void inactivetcb(tcb_t *tcb) {
 }
 
 static tcb_t *tcbget(connkey_t *key, bool getlistening) {
-	MUTEX_ACQUIRE(&conntablemutex, false);
+	MUTEX_ACQUIRE(&conntablemutex);
 	void *v;
 	tcb_t *tcb;
 
@@ -352,7 +352,7 @@ static tcb_t *tcbget(connkey_t *key, bool getlistening) {
 }
 
 static int tcbset(tcb_t *tcb, connkey_t *key, bool remove) {
-	MUTEX_ACQUIRE(&conntablemutex, false);
+	MUTEX_ACQUIRE(&conntablemutex);
 
 	int error;
 	if (remove) {
@@ -738,7 +738,7 @@ static void tcp_handleclose(tcb_t *tcb) {
 			// for a listening socket we also have to flush out the backlog.
 			tcb_t *backlogtcb;
 			while (ringbuffer_read(&tcb->backlog, &backlogtcb, sizeof(tcb_t *))) {
-				MUTEX_ACQUIRE(&backlogtcb->mutex, false);
+				MUTEX_ACQUIRE(&backlogtcb->mutex);
 				tcp_handleclose(backlogtcb);
 				MUTEX_RELEASE(&backlogtcb->mutex);
 			}
@@ -898,7 +898,7 @@ __attribute__((noreturn)) static void tcp_worker() {
 			__assert(!"Bad task type");
 		}
 
-		MUTEX_ACQUIRE(&tcb->mutex, false);
+		MUTEX_ACQUIRE(&tcb->mutex);
 
 		if (tasktype == TASK_TYPE_TIMEOUT && tcb->state != TCB_STATE_CLOSED && tcb->state != TCB_STATE_ABORT) {
 			tcp_handletimeout(tcb);
@@ -950,7 +950,7 @@ __attribute__((noreturn)) static void tcp_worker() {
 					break;
 				}
 
-				MUTEX_ACQUIRE(&newtcb->mutex, false);
+				MUTEX_ACQUIRE(&newtcb->mutex);
 				newtcb->state = TCB_STATE_SYNRECEIVED;
 				newtcb->parent = tcb;
 				TCB_HOLD(tcb); // for parent ref
@@ -1055,7 +1055,7 @@ __attribute__((noreturn)) static void tcp_worker() {
 					itimer_pause(&tcb->itimer, NULL, NULL);
 					tcb->state = TCB_STATE_ESTABILISHED;
 					tcb->sndunack += 1;
-					MUTEX_ACQUIRE(&tcb->parent->mutex, false);
+					MUTEX_ACQUIRE(&tcb->parent->mutex);
 					if (tcb->parent->state == TCB_STATE_CLOSED) {
 						// listening socket was closed in the mean time. close the connection
 						tcp_handleclose(tcb);
@@ -1244,7 +1244,7 @@ static int tcp_send(socket_t *socket, sockdesc_t *sockdesc) {
 		return ENOTCONN;
 
 	tcpsocket_t *tcpsocket = (tcpsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	tcb_t *tcb = tcpsocket->tcb;
 	int error = 0;
 	if (tcb == NULL) {
@@ -1252,7 +1252,7 @@ static int tcp_send(socket_t *socket, sockdesc_t *sockdesc) {
 		return ENOTCONN;
 	}
 
-	MUTEX_ACQUIRE(&tcb->mutex, false);
+	MUTEX_ACQUIRE(&tcb->mutex);
 	if (tcb->reset) {
 		if (current_thread()->proc)
 			signal_signalproc(current_thread()->proc, SIGPIPE);
@@ -1296,7 +1296,7 @@ static int tcp_send(socket_t *socket, sockdesc_t *sockdesc) {
 		int error = poll_dowait(&polldesc, 0);
 		poll_leave(&polldesc);
 		poll_destroydesc(&polldesc);
-		MUTEX_ACQUIRE(&tcb->mutex, false);
+		MUTEX_ACQUIRE(&tcb->mutex);
 
 		if (error)
 			goto leave;
@@ -1328,13 +1328,13 @@ static int tcp_recv(socket_t *socket, sockdesc_t *sockdesc) {
 	sockdesc->flags = 0;
 	int error = 0;
 
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	tcb_t *tcb = tcpsocket->tcb;
 	if (tcb == NULL) {
 		MUTEX_RELEASE(&socket->mutex);
 		return ENOTCONN;
 	}
-	MUTEX_ACQUIRE(&tcb->mutex, false);
+	MUTEX_ACQUIRE(&tcb->mutex);
 	if (tcb->state == TCB_STATE_CLOSED || tcb->state == TCB_STATE_SYNSENT || tcb->state == TCB_STATE_SYNRECEIVED) {
 		error = ENOTCONN;
 		goto cleanup;
@@ -1378,7 +1378,7 @@ static int tcp_recv(socket_t *socket, sockdesc_t *sockdesc) {
 
 		poll_leave(&desc);
 		poll_destroydesc(&desc);
-		MUTEX_ACQUIRE(&tcb->mutex, false);
+		MUTEX_ACQUIRE(&tcb->mutex);
 
 		if (error)
 			goto cleanup;
@@ -1413,7 +1413,7 @@ static int tcp_recv(socket_t *socket, sockdesc_t *sockdesc) {
 
 static int tcp_poll(socket_t *socket, polldata_t *data, int events) {
 	tcpsocket_t *tcpsocket = (tcpsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	int revents = 0;
 	if (tcpsocket->tcb == NULL) {
 		// socket has never connected
@@ -1421,7 +1421,7 @@ static int tcp_poll(socket_t *socket, polldata_t *data, int events) {
 		goto leave;
 	}
 
-	MUTEX_ACQUIRE(&tcpsocket->tcb->mutex, false);
+	MUTEX_ACQUIRE(&tcpsocket->tcb->mutex);
 
 	revents = internalpoll(tcpsocket->tcb, data, events);
 
@@ -1444,7 +1444,7 @@ static int tcp_bind(socket_t *socket, sockaddr_t *addr, cred_t *cred) {
 			return error;
 	}
 
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	tcb_t *tcb = tcpsocket->tcb;
 	if (tcb == NULL) {
 		tcb = allocatetcb(1); // smallest possible buffers TODO not even allocate those
@@ -1456,7 +1456,7 @@ static int tcp_bind(socket_t *socket, sockaddr_t *addr, cred_t *cred) {
 		TCB_HOLD(tcb); // for the release later
 	}
 
-	MUTEX_ACQUIRE(&tcb->mutex, false);
+	MUTEX_ACQUIRE(&tcb->mutex);
 
 	int error;
 	if (tcb->state != TCB_STATE_CLOSED || tcb->port) {
@@ -1491,7 +1491,7 @@ static int tcp_connect(socket_t *socket, sockaddr_t *addr, uintmax_t flags, cred
 	if (mtu == 0 || self == 0)
 		return ENETUNREACH; // no route to ip in routing table
 
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	tcb_t *tcb = tcpsocket->tcb;
 	if (tcb == NULL) {
 		tcb = allocatetcb(mtu);
@@ -1516,7 +1516,7 @@ static int tcp_connect(socket_t *socket, sockaddr_t *addr, uintmax_t flags, cred
 		return EISCONN;
 	}
 
-	MUTEX_ACQUIRE(&tcb->mutex, false);
+	MUTEX_ACQUIRE(&tcb->mutex);
 
 	polldesc_t polldesc = {0};
 	int error = poll_initdesc(&polldesc, 1);
@@ -1609,7 +1609,7 @@ static int tcp_connect(socket_t *socket, sockaddr_t *addr, uintmax_t flags, cred
 
 static int tcp_listen(socket_t *socket, int backlog) {
 	tcpsocket_t *tcpsocket = (tcpsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	tcb_t *tcb = tcpsocket->tcb;
 	if (tcb == NULL) {
 		tcb = allocatetcb(1); // smallest possible buffers TODO not even allocate those
@@ -1670,7 +1670,7 @@ static int tcp_accept(socket_t *server, socket_t *client, sockaddr_t *addr, uint
 	tcpsocket_t *tcpserver = (tcpsocket_t *)server;
 	tcpsocket_t *tcpclient = (tcpsocket_t *)client;
 	// no need to lock client, only one thread is supposed to have a reference to it right now.
-	MUTEX_ACQUIRE(&server->mutex, false);
+	MUTEX_ACQUIRE(&server->mutex);
 
 	tcb_t *tcb = tcpserver->tcb;
 	int error = 0;
@@ -1679,7 +1679,7 @@ static int tcp_accept(socket_t *server, socket_t *client, sockaddr_t *addr, uint
 		return EINVAL;
 	}
 
-	MUTEX_ACQUIRE(&tcb->mutex, false);
+	MUTEX_ACQUIRE(&tcb->mutex);
 
 	if (tcb->state != TCB_STATE_LISTEN) {
 		error = EINVAL;
@@ -1713,7 +1713,7 @@ static int tcp_accept(socket_t *server, socket_t *client, sockaddr_t *addr, uint
 
 		poll_leave(&desc);
 		poll_destroydesc(&desc);
-		MUTEX_ACQUIRE(&tcb->mutex, false);
+		MUTEX_ACQUIRE(&tcb->mutex);
 
 		if (error)
 			goto cleanup;
@@ -1738,12 +1738,12 @@ static int tcp_accept(socket_t *server, socket_t *client, sockaddr_t *addr, uint
 
 static size_t tcp_datacount(socket_t *socket) {
 	tcpsocket_t *tcpsocket = (tcpsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	size_t count = 0;
 	if (tcpsocket->tcb == NULL)
 		goto cleanup;
 
-	MUTEX_ACQUIRE(&tcpsocket->tcb->mutex, false);
+	MUTEX_ACQUIRE(&tcpsocket->tcb->mutex);
 
 	count = RINGBUFFER_DATACOUNT(&tcpsocket->tcb->receivebuffer);
 
@@ -1759,7 +1759,7 @@ static void tcp_destroy(socket_t *socket) {
 	// no need to acquire the socket mutex as we have the last reference to it
 	tcb_t *tcb = tcpsocket->tcb;
 	if (tcb) {
-		MUTEX_ACQUIRE(&tcb->mutex, false);
+		MUTEX_ACQUIRE(&tcb->mutex);
 
 		if (tcb->state != TCB_STATE_CLOSED && tcb->state != TCB_STATE_ABORT)
 			tcp_handleclose(tcb);
@@ -1773,11 +1773,11 @@ static void tcp_destroy(socket_t *socket) {
 
 static int tcp_getname(socket_t *socket, sockaddr_t *addr) {
 	tcpsocket_t *tcpsocket = (tcpsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	tcb_t *tcb = tcpsocket->tcb;
 
 	if (tcb) {
-		MUTEX_ACQUIRE(&tcb->mutex, false);
+		MUTEX_ACQUIRE(&tcb->mutex);
 
 		addr->ipv4addr.addr = 0;
 		addr->ipv4addr.port = tcb->port;
@@ -1794,11 +1794,11 @@ static int tcp_getname(socket_t *socket, sockaddr_t *addr) {
 
 static int tcp_getpeername(socket_t *socket, sockaddr_t *addr) {
 	tcpsocket_t *tcpsocket = (tcpsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	tcb_t *tcb = tcpsocket->tcb;
 
 	if (tcb) {
-		MUTEX_ACQUIRE(&tcb->mutex, false);
+		MUTEX_ACQUIRE(&tcb->mutex);
 
 		addr->ipv4addr.addr = tcb->key.peer;
 		addr->ipv4addr.port = tcb->key.peerport;
@@ -1819,7 +1819,7 @@ static int tcp_setopt(socket_t *socket, int optname, void *buffer, size_t len, c
 	tcb_t *tcb = tcpsocket->tcb;
 
 	if (tcb) {
-		MUTEX_ACQUIRE(&tcb->mutex, false);
+		MUTEX_ACQUIRE(&tcb->mutex);
 
 		switch (optname) {
 			case SO_KEEPALIVE:

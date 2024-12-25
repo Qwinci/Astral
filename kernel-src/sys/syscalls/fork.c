@@ -35,7 +35,7 @@ syscallret_t syscall_fork(context_t *ctx) {
 	if (ret.errno)
 		goto cleanup;
 
-	MUTEX_ACQUIRE(&proc->mutex, false);
+	MUTEX_ACQUIRE(&proc->mutex);
 
 	nproc->parent = proc;
 	nproc->sibling = proc->child;

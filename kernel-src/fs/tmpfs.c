@@ -503,7 +503,7 @@ static int tmpfs_sync(vnode_t *node) {
 }
 
 static int tmpfs_lock(vnode_t *node) {
-	MUTEX_ACQUIRE(&node->lock, false);
+	MUTEX_ACQUIRE(&node->lock);
 	return 0;
 }
 

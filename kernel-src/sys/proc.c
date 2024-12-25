@@ -24,7 +24,7 @@ pid_t proc_allocate_pid(void) {
 }
 
 proc_t *proc_get_from_pid(int pid) {
-	MUTEX_ACQUIRE(&proc_pid_table_mutex, false);
+	MUTEX_ACQUIRE(&proc_pid_table_mutex);
 	void *_proc = NULL;
 	hashtable_get(&pid_table, &_proc, &pid, sizeof(pid));
 	proc_t *proc = _proc;
@@ -37,7 +37,7 @@ proc_t *proc_get_from_pid(int pid) {
 }
 
 int proc_signal_all(int signal, proc_t *sender) {
-	MUTEX_ACQUIRE(&proc_pid_table_mutex, false);
+	MUTEX_ACQUIRE(&proc_pid_table_mutex);
 
 	pid_t senderpgid = sender ? jobctl_getpgid(sender) : 0;
 
@@ -108,7 +108,7 @@ proc_t *proc_create() {
 	proc->umask = 022; // default umask
 
 	// add to pid table
-	MUTEX_ACQUIRE(&proc_pid_table_mutex, false);
+	MUTEX_ACQUIRE(&proc_pid_table_mutex);
 	if (hashtable_set(&pid_table, proc, &proc->pid, sizeof(proc->pid), true)) {
 		MUTEX_RELEASE(&proc_pid_table_mutex);
 		free(proc->fd);
@@ -255,7 +255,7 @@ void proc_exit(void) {
 	itimer_pause(&proc->timer.profiling, NULL, NULL);
 
 	// zombify the proc
-	MUTEX_ACQUIRE(&proc->mutex, false);
+	MUTEX_ACQUIRE(&proc->mutex);
 
 	VOP_RELEASE(proc->root);
 	VOP_RELEASE(proc->cwd);
@@ -264,7 +264,7 @@ void proc_exit(void) {
 	proc_t *lastchild = proc->child;
 
 
-	MUTEX_ACQUIRE(&init_proc->mutex, false);
+	MUTEX_ACQUIRE(&init_proc->mutex);
 
 	int belowzombiecount = 0;
 

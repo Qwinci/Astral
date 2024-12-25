@@ -18,7 +18,7 @@ static eventheader_t pagereadyevent;
 size_t vmmcache_cachedpages;
 
 #define HOLD_LOCK() \
-	MUTEX_ACQUIRE(&mutex, false);
+	MUTEX_ACQUIRE(&mutex);
 
 #define RELEASE_LOCK() \
 	MUTEX_RELEASE(&mutex);

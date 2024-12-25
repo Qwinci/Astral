@@ -72,7 +72,7 @@ syscallret_t syscall_futex(context_t *, uint32_t *futexp, int op, uint32_t value
 	if (ret.errno)
 		return ret;
 
-	MUTEX_ACQUIRE(&futexmutex, false);
+	MUTEX_ACQUIRE(&futexmutex);
 
 	bool doleave = true;
 	uint32_t word;
@@ -130,7 +130,7 @@ syscallret_t syscall_futex(context_t *, uint32_t *futexp, int op, uint32_t value
 				if (desc.event)
 					revents = desc.event->revents;
 
-				MUTEX_ACQUIRE(&futexmutex, false);
+				MUTEX_ACQUIRE(&futexmutex);
 
 				if (revents == 0 || ret.errno == EINTR) {
 					// timed out or interrupted

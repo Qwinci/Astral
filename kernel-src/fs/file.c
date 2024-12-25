@@ -71,7 +71,7 @@ static int growtable(int newcount) {
 
 file_t *fd_get(int fd) {
 	proc_t *proc = current_thread()->proc;
-	MUTEX_ACQUIRE(&proc->fdmutex, false);
+	MUTEX_ACQUIRE(&proc->fdmutex);
 
 	file_t *file = fd < proc->fdcount ? proc->fd[fd].file : NULL;
 	if (file)
@@ -85,7 +85,7 @@ file_t *fd_get(int fd) {
 int fd_setflags(int fd, int flags) {
 	int error = 0;
 	proc_t *proc = current_thread()->proc;
-	MUTEX_ACQUIRE(&proc->fdmutex, false);
+	MUTEX_ACQUIRE(&proc->fdmutex);
 
 	if (proc->fd[fd].file)
 		proc->fd[fd].flags = flags;
@@ -99,7 +99,7 @@ int fd_setflags(int fd, int flags) {
 int fd_getflags(int fd, int *flags) {
 	int error = 0;
 	proc_t *proc = current_thread()->proc;
-	MUTEX_ACQUIRE(&proc->fdmutex, false);
+	MUTEX_ACQUIRE(&proc->fdmutex);
 
 	if (proc->fd[fd].file)
 		*flags = proc->fd[fd].flags;
@@ -120,7 +120,7 @@ int fd_new(int flags, file_t **rfile, int *rfd) {
 		return ENOMEM;
 
 	proc_t *proc = current_thread()->proc;
-	MUTEX_ACQUIRE(&proc->fdmutex, false);
+	MUTEX_ACQUIRE(&proc->fdmutex);
 
 	// find first free fd
 	int fd = getfree(proc->fdfirst);
@@ -149,7 +149,7 @@ int fd_new(int flags, file_t **rfile, int *rfd) {
 
 int fd_close(int fd) {
 	proc_t *proc = current_thread()->proc;
-	MUTEX_ACQUIRE(&proc->fdmutex, false);
+	MUTEX_ACQUIRE(&proc->fdmutex);
 
 	file_t *file = fd < proc->fdcount ? proc->fd[fd].file : NULL;
 	if (file) {
@@ -173,7 +173,7 @@ int fd_close(int fd) {
 int fd_clone(proc_t *targproc) {
 	proc_t *proc = current_thread()->proc;
 	int error = 0;
-	MUTEX_ACQUIRE(&proc->fdmutex, false);
+	MUTEX_ACQUIRE(&proc->fdmutex);
 
 	targproc->fdcount = proc->fdcount;
 	targproc->fdfirst = proc->fdfirst;
@@ -199,7 +199,7 @@ int fd_clone(proc_t *targproc) {
 int fd_insert(file_t *file, int *fdp) {
 	proc_t *proc = current_thread()->proc;
 	int err = 0;
-	MUTEX_ACQUIRE(&proc->fdmutex, false);
+	MUTEX_ACQUIRE(&proc->fdmutex);
 	int fd = getfree(0);
 
 	if (fd == -1) {
@@ -226,7 +226,7 @@ int fd_dup(int oldfd, int newfd, bool exact, int fdflags, int *retfd) {
 	if (newfd < 0 || newfd >= FDTABLE_LIMIT)
 		return EBADF;
 
-	MUTEX_ACQUIRE(&proc->fdmutex, false);
+	MUTEX_ACQUIRE(&proc->fdmutex);
 
 	file_t *file = oldfd < proc->fdcount ? proc->fd[oldfd].file : NULL;
 	if (file == NULL) {

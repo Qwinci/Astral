@@ -78,7 +78,7 @@ static void set(netdev_t *netdev, uint32_t ip, mac_t mac, timespec_t time) {
 static void cleanupthreadfn() {
 	for (;;) {
 		sched_sleep_us(1000000); // 1 second
-		MUTEX_ACQUIRE(&cachelock, false);
+		MUTEX_ACQUIRE(&cachelock);
 		timespec_t currtime = timekeeper_time();
 		hashentry_t entrybuffer;
 		HASHTABLE_FOREACH(&caches) {
@@ -164,7 +164,7 @@ static void handlerthreadfn() {
 		switch (entry.opcode) {
 			case OPCODE_REPLY:
 				// add to cache
-				MUTEX_ACQUIRE(&cachelock, false);
+				MUTEX_ACQUIRE(&cachelock);
 				timespec_t time = timekeeper_time();
 				set(entry.netdev, entry.ip, entry.mac, time);
 				EVENT_SIGNAL(&addedevent);
@@ -237,7 +237,7 @@ static int sendrequest(netdev_t *netdev, uint32_t ip) {
 }
 
 int arp_lookup(netdev_t *netdev, uint32_t ip, mac_t *mac) {
-	MUTEX_ACQUIRE(&cachelock, false);
+	MUTEX_ACQUIRE(&cachelock);
 	int e = 0;
 	if (get(netdev, ip, mac) == 0)
 		goto cleanup;
@@ -266,7 +266,7 @@ int arp_lookup(netdev_t *netdev, uint32_t ip, mac_t *mac) {
 
 		MUTEX_RELEASE(&cachelock);
 		int timedout = EVENT_WAIT(&eventlistener, to);
-		MUTEX_ACQUIRE(&cachelock, false);
+		MUTEX_ACQUIRE(&cachelock);
 		time = timekeeper_time();
 
 		if (get(netdev, ip, mac) == 0) {

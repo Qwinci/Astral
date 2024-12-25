@@ -72,7 +72,7 @@ static void timekeeper_sync_isr(isr_t *, context_t *) {
 // their offsets to the passed microseconds of the calling CPU in ticks. this isn't 100% precise but its not
 // exactly possible to be
 void timekeeper_sync(void) {
-	MUTEX_ACQUIRE(&sync_mutex, false);
+	MUTEX_ACQUIRE(&sync_mutex);
 	bool int_status = interrupt_set(false);
 
 	sync_go_ahead = false;

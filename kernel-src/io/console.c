@@ -15,7 +15,7 @@ static thread_t *thread;
 static tty_t *tty;
 
 size_t console_write(char *str, size_t count) {
-	MUTEX_ACQUIRE(&writemutex, false);
+	MUTEX_ACQUIRE(&writemutex);
 
 	term_write(str, count);
 

@@ -11,7 +11,7 @@ static MUTEX_DEFINE(allocate_mutex);
 static SPINLOCK_DEFINE(tree_lock);
 
 topology_node_t *topology_create_node(void) {
-	MUTEX_ACQUIRE(&allocate_mutex, false);
+	MUTEX_ACQUIRE(&allocate_mutex);
 	if (unlikely(slab_cache == NULL)) {
 		slab_cache = slab_newcache(sizeof(topology_node_t), 0, NULL, NULL);
 		__assert(slab_cache);

@@ -140,7 +140,7 @@ static int udp_bind(socket_t *socket, sockaddr_t *addr, cred_t *cred) {
 	}
 
 	int e;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	if (socket->state != SOCKET_STATE_UNBOUND) {
 		e = EINVAL;
 		goto cleanup;
@@ -183,7 +183,7 @@ static int internalpoll(socket_t *socket, polldata_t *data, int events) {
 static int udp_send(socket_t *socket, sockdesc_t *sockdesc) {
 	udpsocket_t *udpsocket = (udpsocket_t *)socket;
 	int e;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 
 	if (sockdesc->addr == NULL && socket->state != SOCKET_STATE_CONNECTED) {
 		e = ENOTCONN;
@@ -218,7 +218,7 @@ static int udp_recv(socket_t *socket, sockdesc_t *sockdesc) {
 	sockdesc->flags = 0;
 
 	int e = 0;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 
 	if (udpsocket->port == 0) {
 		e = EINVAL;
@@ -256,7 +256,7 @@ static int udp_recv(socket_t *socket, sockdesc_t *sockdesc) {
 		if (e)
 			return e;
 
-		MUTEX_ACQUIRE(&socket->mutex, false);
+		MUTEX_ACQUIRE(&socket->mutex);
 	}
 
 	// this abuses an asterisk on the ringbuffer implementation that makes it not need locking when
@@ -311,7 +311,7 @@ static void udp_destroy(socket_t *socket) {
 
 static int udp_getname(socket_t *socket, sockaddr_t *addr) {
 	udpsocket_t *udpsocket = (udpsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	addr->ipv4addr.addr = udpsocket->address;
 	addr->ipv4addr.port = udpsocket->port;
 	MUTEX_RELEASE(&socket->mutex);
@@ -320,7 +320,7 @@ static int udp_getname(socket_t *socket, sockaddr_t *addr) {
 
 static int udp_getpeername(socket_t *socket, sockaddr_t *addr) {
 	udpsocket_t *udpsocket = (udpsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	addr->ipv4addr.addr = udpsocket->peeraddress;
 	addr->ipv4addr.port = udpsocket->peerport;
 	MUTEX_RELEASE(&socket->mutex);
@@ -329,7 +329,7 @@ static int udp_getpeername(socket_t *socket, sockaddr_t *addr) {
 
 static int udp_poll(socket_t *socket, polldata_t *data, int events) {
 	int revents = 0;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 
 	revents = internalpoll(socket, data, events);
 

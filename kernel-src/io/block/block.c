@@ -58,7 +58,7 @@ static hashtable_t blocktable;
 
 static blockdesc_t *getdesc(int id) {
 	void *ret;
-	MUTEX_ACQUIRE(&tablemutex, false);
+	MUTEX_ACQUIRE(&tablemutex);
 	int err = hashtable_get(&blocktable, &ret, &id, sizeof(id));
 	MUTEX_RELEASE(&tablemutex);
 	return err ? NULL : ret;
@@ -181,7 +181,7 @@ static devops_t devops = {
 };
 
 static int registerdesc(blockdesc_t *desc, char *name) {
-	MUTEX_ACQUIRE(&tablemutex, false);
+	MUTEX_ACQUIRE(&tablemutex);
 	int id = currentid++;
 	int ret = hashtable_set(&blocktable, desc, &id, sizeof(id), true);
 	MUTEX_RELEASE(&tablemutex);

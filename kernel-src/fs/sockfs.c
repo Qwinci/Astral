@@ -13,7 +13,7 @@
 static scache_t *nodecache;
 static uintmax_t currentinode;
 
-#define INTERNAL_LOCK(v) MUTEX_ACQUIRE(&(v)->lock, false)
+#define INTERNAL_LOCK(v) MUTEX_ACQUIRE(&(v)->lock)
 #define INTERNAL_UNLOCK(v) MUTEX_RELEASE(&(v)->lock)
 
 int sockfs_open(vnode_t **node, int flags, cred_t *cred) {

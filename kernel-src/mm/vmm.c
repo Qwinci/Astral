@@ -44,7 +44,7 @@ static vmmrange_t *allocrange() {
 	vmmcache_t *cache = cachelist;
 	vmmrange_t *range = NULL;
 	while (cache) {
-		MUTEX_ACQUIRE(&cache->header.lock, false);
+		MUTEX_ACQUIRE(&cache->header.lock);
 		if (cache->header.freecount > 0) {
 			--cache->header.freecount;
 			uintmax_t r = getentrynumber(cache);
@@ -66,7 +66,7 @@ static vmmrange_t *allocrange() {
 
 static void freerange(vmmrange_t *range) {
 	vmmcache_t *cache = (vmmcache_t *)ROUND_DOWN((uintptr_t)range, PAGE_SIZE);
-	MUTEX_ACQUIRE(&cache->header.lock, false);
+	MUTEX_ACQUIRE(&cache->header.lock);
 
 	int rangeoffset = ((uintptr_t)range - (uintptr_t)cache->ranges) / sizeof(vmmrange_t);
 	range->size = 0;
@@ -501,7 +501,7 @@ int vmm_changemmuflags(void *base, size_t size, mmuflags_t mmuflags, int flags) 
 	if (space == NULL)
 		return ENOMEM;
 
-	MUTEX_ACQUIRE(&space->lock, false);
+	MUTEX_ACQUIRE(&space->lock);
 
 	int error = changemap(space, base, size, false, flags, mmuflags);
 	arch_mmu_invalidate_range(base, size);
@@ -536,7 +536,7 @@ bool vmm_pagefault(void *addr, bool user, int actions) {
 		return false;
 	}
 
-	MUTEX_ACQUIRE(&space->lock, false);
+	MUTEX_ACQUIRE(&space->lock);
 	vmmrange_t *range = getrange(space, addr);
 
 	bool status = false;
@@ -665,7 +665,7 @@ void *vmm_getphysical(void *addr, bool hold) {
 	if (space == NULL)
 		return NULL;
 
-	MUTEX_ACQUIRE(&space->lock, false);
+	MUTEX_ACQUIRE(&space->lock);
 
 	void *physical = arch_mmu_getphysical(current_vmm_context()->pagetable, addr);
 
@@ -695,7 +695,7 @@ void *vmm_map(void *addr, volatile size_t size, int flags, mmuflags_t mmuflags, 
 	if (space == NULL)
 		return NULL;
 
-	MUTEX_ACQUIRE(&space->lock, false);
+	MUTEX_ACQUIRE(&space->lock);
 	vmmrange_t *range = NULL;
 
 	void *start = getfreerange(space, addr, size);
@@ -803,7 +803,7 @@ void vmm_unmap(void *addr, size_t size, int flags) {
 	if (space == NULL)
 		return;
 
-	MUTEX_ACQUIRE(&space->lock, false);
+	MUTEX_ACQUIRE(&space->lock);
 
 	// make memory inacessible
 	changemap(space, addr, size, false, flags, 0);
@@ -858,7 +858,7 @@ vmmcontext_t *vmm_fork(vmmcontext_t *oldcontext) {
 	if (newcontext == NULL)
 		return NULL;
 
-	MUTEX_ACQUIRE(&oldcontext->space.lock, false);
+	MUTEX_ACQUIRE(&oldcontext->space.lock);
 
 	vmmrange_t *range = oldcontext->space.ranges;
 

@@ -23,7 +23,7 @@ static struct flanterm_context *term_ctx;
 static mutex_t term_mutex;
 
 void term_write(char *str, size_t count) {
-	MUTEX_ACQUIRE(&term_mutex, false);
+	MUTEX_ACQUIRE(&term_mutex);
 	flanterm_write(term_ctx, str, count);
 	MUTEX_RELEASE(&term_mutex);
 }

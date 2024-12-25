@@ -11,7 +11,7 @@ static mutex_t tablelock;
 static devops_t devops = {0};
 
 int netdev_register(netdev_t *netdev, char *name) {
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 	int e = hashtable_set(&nametable, netdev, name, strlen(name), true);
 	if (e)
 		goto leave;
@@ -27,7 +27,7 @@ int netdev_register(netdev_t *netdev, char *name) {
 }
 
 netdev_t *netdev_getdev(char *name) {
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 	netdev_t *netdev = NULL;
 	void *tmp;
 

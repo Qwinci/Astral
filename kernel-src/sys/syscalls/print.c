@@ -17,7 +17,7 @@ syscallret_t syscall_print(context_t *context, char *message) {
 		initialized = true;
 	}
 
-	MUTEX_ACQUIRE(&mutex, false);
+	MUTEX_ACQUIRE(&mutex);
 	arch_e9_puts(message);
 	arch_e9_putc('\n');
 	MUTEX_RELEASE(&mutex);

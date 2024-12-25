@@ -86,7 +86,7 @@ typedef struct proc_t {
 // the acquire of the pid table mutex is done here to prevent a nasty race condition where sched_inactiveproc could be called multiple times
 // due to the pid table itself not holding any references to the process
 #define PROC_RELEASE(v) {\
-		MUTEX_ACQUIRE(&proc_pid_table_mutex, false); \
+		MUTEX_ACQUIRE(&proc_pid_table_mutex); \
 		if (__atomic_sub_fetch(&(v)->refcount, 1, __ATOMIC_SEQ_CST) == 0) {\
 			proc_inactive(v); \
 			(v) = NULL; \

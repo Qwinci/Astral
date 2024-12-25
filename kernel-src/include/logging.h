@@ -18,7 +18,7 @@ extern mutex_t printf_mutex;
 
 #define printf(...) { \
 	if (likely(current_thread())) {\
-		MUTEX_ACQUIRE(&printf_mutex, false); \
+		MUTEX_ACQUIRE(&printf_mutex); \
 	} else { \
 		while (MUTEX_TRY(&printf_mutex) == false) CPU_PAUSE(); \
 	} \

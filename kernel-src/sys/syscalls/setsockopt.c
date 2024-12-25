@@ -43,7 +43,7 @@ syscallret_t syscall_setsockopt(context_t *, int fd, int level, int optname, voi
 	socket_t *socket = SOCKFS_SOCKET_FROM_NODE(file->vnode); 
 
 
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	switch (optname) {
 		case SO_BINDTODEVICE: {
 			if (val) {

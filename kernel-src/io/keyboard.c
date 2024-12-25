@@ -148,7 +148,7 @@ static mutex_t tablelock;
 
 static keyboard_t* getkb(int kb) {
 	void *kbp = NULL;
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 	hashtable_get(&kbtable, &kbp, &kb, sizeof(kb));
 	MUTEX_RELEASE(&tablelock);
 	return kbp;
@@ -226,7 +226,7 @@ keyboard_t *keyboard_new() {
 	if (kb == NULL)
 		return NULL;
 
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 
 	if (hashtable_set(&kbtable, kb, &currentkbnum, sizeof(currentkbnum), true)) {
 		MUTEX_RELEASE(&tablelock);

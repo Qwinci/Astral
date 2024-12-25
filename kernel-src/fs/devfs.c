@@ -21,7 +21,7 @@ static uintmax_t currentinode;
 static vfsops_t vfsops;
 static vops_t vnops;
 
-#define INTERNAL_LOCK(v) MUTEX_ACQUIRE(&(v)->lock, false)
+#define INTERNAL_LOCK(v) MUTEX_ACQUIRE(&(v)->lock)
 #define INTERNAL_UNLOCK(v) MUTEX_RELEASE(&(v)->lock);
 
 static int devfs_mount(vfs_t **vfs, vnode_t *mountpoint, vnode_t *backing, void *data) {
@@ -112,7 +112,7 @@ int devfs_lookup(vnode_t *node, char *name, vnode_t **result, cred_t *cred) {
 
 	void *v;
 	INTERNAL_LOCK(node);
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 	int error = hashtable_get(&devnode->children, &v, name, strlen(name));
 	MUTEX_RELEASE(&tablelock);
 	if (error) {
@@ -518,7 +518,7 @@ int devfs_register(devops_t *devops, char *name, int type, int major, int minor,
 
 	int key[2] = {major, minor};
 
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 	int error = hashtable_set(&devtable, master, key, sizeof(key), true);
 	MUTEX_RELEASE(&tablelock);
 	if (error) {
@@ -550,7 +550,7 @@ int devfs_register(devops_t *devops, char *name, int type, int major, int minor,
 	VOP_RELEASE(dir);
 
 	if (error) {
-		MUTEX_ACQUIRE(&tablelock, false);
+		MUTEX_ACQUIRE(&tablelock);
 		__assert(hashtable_remove(&devtable, key, sizeof(key) == 0));
 		MUTEX_RELEASE(&tablelock);
 		slab_free(nodecache, master);
@@ -570,7 +570,7 @@ int devfs_register(devops_t *devops, char *name, int type, int major, int minor,
 // allocate a pointer node to the master node associated with device major and minor
 int devfs_getnode(vnode_t *physical, int major, int minor, vnode_t **node) {
 	int key[2] = {major, minor};
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 	void *r;
 	int err = hashtable_get(&devtable, &r, key, sizeof(key));
 	MUTEX_RELEASE(&tablelock);
@@ -596,7 +596,7 @@ int devfs_getnode(vnode_t *physical, int major, int minor, vnode_t **node) {
 void devfs_remove(char *name, int major, int minor) {
 	int key[2] = {major, minor};
 	// remove devtable reference
-	MUTEX_ACQUIRE(&tablelock, false);
+	MUTEX_ACQUIRE(&tablelock);
 	__assert(hashtable_remove(&devtable, key, sizeof(key)) == 0);
 	MUTEX_RELEASE(&tablelock);
 

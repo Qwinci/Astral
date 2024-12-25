@@ -87,7 +87,7 @@ static timekeeper_source_info_t *hpet_init(void) {
 	uacpi_table tbl;
 	struct acpi_hpet *table;
 
-	MUTEX_ACQUIRE(&init_mutex, false);
+	MUTEX_ACQUIRE(&init_mutex);
 	if (timekeeper_source_info.hz) {
 		// already initialized by someone else
 		goto leave;

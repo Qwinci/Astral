@@ -176,7 +176,7 @@ typedef uint32_t blockptr_t;
 #define ASSERT_UNCLEAN(fs, x) \
 	if (!(x)) { \
 		printf("ext2: assert %s on line %d on function %s failed. setting filesystem as unclean\n", #x, __LINE__, __func__); \
-		MUTEX_ACQUIRE(&fs->superblocklock, false); \
+		MUTEX_ACQUIRE(&fs->superblocklock); \
 		fs->superblock.state = SB_STATE_UNCLEAN; \
 		syncsuperblock(fs); \
 		MUTEX_RELEASE(&fs->superblocklock); \
@@ -219,7 +219,7 @@ static int syncsuperblock(ext2fs_t *fs) {
 }
 
 static int changedircount(ext2fs_t *fs, int bg, int change) {
-	MUTEX_ACQUIRE(&fs->descriptorlock, false);
+	MUTEX_ACQUIRE(&fs->descriptorlock);
 	blockgroupdesc_t desc;
 	size_t count;
 	int e = vfs_read(fs->backing, &desc, sizeof(blockgroupdesc_t), DESC_GETDISKOFFSET(fs, bg), &count, 0);
@@ -237,7 +237,7 @@ static int changedircount(ext2fs_t *fs, int bg, int change) {
 
 // allocates either a block or an inode
 static int allocatestructure(ext2fs_t *fs, uintmax_t *retid, bool inode) {
-	MUTEX_ACQUIRE(&fs->descriptorlock, false);
+	MUTEX_ACQUIRE(&fs->descriptorlock);
 	uint8_t *bm = NULL;
 	uintmax_t bg = inode ? fs->lowestfreeinodebg : fs->lowestfreeblockbg;
 
@@ -331,7 +331,7 @@ static int allocatestructure(ext2fs_t *fs, uintmax_t *retid, bool inode) {
 	*retid = structurefound;
 
 	// update superblock unallocated structure count
-	MUTEX_ACQUIRE(&fs->superblocklock, false);
+	MUTEX_ACQUIRE(&fs->superblocklock);
 	if (inode)
 		fs->superblock.unallocatedinodes -= 1;
 	else
@@ -353,7 +353,7 @@ static int freestructure(ext2fs_t *fs, uintmax_t id, bool inode) {
 	int e = 0;
 	uint8_t *bm = NULL;
 	int bg = inode ? INODE_GETGROUP(fs, id) : BLOCK_GETGROUP(fs, id);
-	MUTEX_ACQUIRE(&fs->descriptorlock, false);
+	MUTEX_ACQUIRE(&fs->descriptorlock);
 
 	blockgroupdesc_t desc;
 	size_t readc;
@@ -407,7 +407,7 @@ static int freestructure(ext2fs_t *fs, uintmax_t id, bool inode) {
 	}
 
 	// update superblock unallocated structure count
-	MUTEX_ACQUIRE(&fs->superblocklock, false);
+	MUTEX_ACQUIRE(&fs->superblocklock);
 	if (inode)
 		fs->superblock.unallocatedinodes += 1;
 	else
@@ -455,7 +455,7 @@ static int writeinode(ext2fs_t *fs, inode_t *buffer, int inode) {
 	if (count != sizeof(blockgroupdesc_t))
 		return EIO;
 
-	MUTEX_ACQUIRE(&fs->inodewritelock, false);
+	MUTEX_ACQUIRE(&fs->inodewritelock);
 	// write inode from buffer
 	e = vfs_write(fs->backing, buffer, sizeof(inode_t), INODE_GETDISKOFFSET(fs, BLOCK_GETDISKOFFSET(fs, desc.inodetable), inode), &count, 0);
 	MUTEX_RELEASE(&fs->inodewritelock);
@@ -1189,7 +1189,7 @@ static int ext2_lookup(vnode_t *vnode, char *name, vnode_t **result, cred_t *cre
 	if (err)
 		goto cleanup;
 
-	MUTEX_ACQUIRE(&fs->inodetablelock, false);
+	MUTEX_ACQUIRE(&fs->inodetablelock);
 
 	void *tablev;
 	// check if it isn't already in the inode table
@@ -1501,7 +1501,7 @@ static int internalcreate(vnode_t *parent, char *name, vattr_t *attr, int type, 
 	if (err)
 		goto cleanup;
 
-	MUTEX_ACQUIRE(&fs->inodetablelock, false);
+	MUTEX_ACQUIRE(&fs->inodetablelock);
 	err = hashtable_set(&fs->inodetable, newnode, &newnode->id, sizeof(newnode->id), true);
 	MUTEX_RELEASE(&fs->inodetablelock);
 	ASSERT_UNCLEAN(fs, err == 0);
@@ -1591,7 +1591,7 @@ static int ext2_munmap(vnode_t *node, void *addr, uintmax_t offset, int flags, c
 static int handleinodeunlink(ext2fs_t *fs, ext2node_t *node, int inode, ext2node_t *known) {
 	bool isdir = false;
 	void *v;
-	MUTEX_ACQUIRE(&fs->inodetablelock, false);
+	MUTEX_ACQUIRE(&fs->inodetablelock);
 	int err = hashtable_get(&fs->inodetable, &v, &inode, sizeof(inode));
 	if (err == ENOENT) {
 		__assert(known == NULL);
@@ -1805,7 +1805,7 @@ static int ext2_sync(vnode_t *vnode) {
 }
 
 static int ext2_lock(vnode_t *vnode) {
-	MUTEX_ACQUIRE(&vnode->lock, false);
+	MUTEX_ACQUIRE(&vnode->lock);
 	return 0;
 }
 
@@ -1828,7 +1828,7 @@ static int ext2_inactive(vnode_t *vnode) {
 	} else {
 		// the node does not have any more links on the file system nor references and
 		// we should free it completely from the filesystem.
-		MUTEX_ACQUIRE(&fs->inodetablelock, false);
+		MUTEX_ACQUIRE(&fs->inodetablelock);
 		__assert(hashtable_remove(&fs->inodetable, &node->id, sizeof(node->id)) == 0);
 		MUTEX_RELEASE(&fs->inodetablelock);
 
@@ -1845,7 +1845,7 @@ static int ext2_inactive(vnode_t *vnode) {
 static int ext2_root(vfs_t *vfs, vnode_t **vnodep) {
 	ext2fs_t *fs = (ext2fs_t *)vfs;
 	int err = 0;
-	MUTEX_ACQUIRE(&fs->rootlock, false);
+	MUTEX_ACQUIRE(&fs->rootlock);
 	if (fs->root) {
 		*vnodep = &fs->root->vnode;
 		goto leave;

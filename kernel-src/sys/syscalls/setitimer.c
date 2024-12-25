@@ -36,7 +36,7 @@ syscallret_t syscall_getitimer(context_t *context, int which, itimerval_t *value
 		return ret;
 	}
 
-	MUTEX_ACQUIRE(&current_thread()->proc->timer.mutex, false);
+	MUTEX_ACQUIRE(&current_thread()->proc->timer.mutex);
 
 	uintmax_t oldremaining, oldrepeat;
 	itimer_pause(itimer, &oldremaining, &oldrepeat);
@@ -76,7 +76,7 @@ syscallret_t syscall_setitimer(context_t *context, int which, itimerval_t *unew,
 			return ret;
 	}
 
-	MUTEX_ACQUIRE(&current_thread()->proc->timer.mutex, false);
+	MUTEX_ACQUIRE(&current_thread()->proc->timer.mutex);
 	uintmax_t oldremaining, oldrepeat;
 	itimer_pause(itimer, &oldremaining, &oldrepeat);
 

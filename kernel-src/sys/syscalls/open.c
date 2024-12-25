@@ -85,7 +85,7 @@ syscallret_t syscall_openat(context_t *context, int dirfd, char *path, int flags
 		goto cleanup;
 
 	if (vnode->type == V_TYPE_REGULAR && (flags & O_TRUNC) && (flags & FILE_WRITE)) {
-		MUTEX_ACQUIRE(&vnode->size_lock, false);
+		MUTEX_ACQUIRE(&vnode->size_lock);
 		VOP_LOCK(vnode);
 
 		ret.errno = VOP_RESIZE(vnode, 0, &current_thread()->proc->cred);

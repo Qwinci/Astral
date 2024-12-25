@@ -17,7 +17,7 @@ static uintmax_t currentinode;
 
 static vops_t vnops;
 
-#define INTERNAL_LOCK(v) MUTEX_ACQUIRE(&(v)->lock, false)
+#define INTERNAL_LOCK(v) MUTEX_ACQUIRE(&(v)->lock)
 #define INTERNAL_UNLOCK(v) MUTEX_RELEASE(&(v)->lock)
 
 int pipefs_close(vnode_t *node, int flags, cred_t *cred) {

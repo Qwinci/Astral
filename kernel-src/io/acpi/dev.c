@@ -39,7 +39,7 @@ static int read(int minor, iovec_iterator_t *iovec_iterator, size_t size, uintma
 	if (error)
 		return error;
 
-	MUTEX_ACQUIRE(&mutex, false);
+	MUTEX_ACQUIRE(&mutex);
 
 	for (;;) {
 		int revents = internalpoll(&desc.data[0], POLLIN);
@@ -97,7 +97,7 @@ static int write(int minor, iovec_iterator_t *iovec_iterator, size_t size, uintm
 }
 
 static int poll(int minor, polldata_t *data, int events) {
-	MUTEX_ACQUIRE(&mutex, false);
+	MUTEX_ACQUIRE(&mutex);
 	int revents = internalpoll(data, events);
 	MUTEX_RELEASE(&mutex);
 	return revents;

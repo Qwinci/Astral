@@ -132,7 +132,7 @@ void *pmm_getpageaddress(page_t *page) {
 void pmm_hold(void *addr) {
 	page_t *page = &pages[((uintptr_t)addr / PAGE_SIZE)];
 
-	MUTEX_ACQUIRE(&freelistmutex, false);
+	MUTEX_ACQUIRE(&freelistmutex);
 	internalhold(page);
 	MUTEX_RELEASE(&freelistmutex);
 }
@@ -144,7 +144,7 @@ void pmm_release(void *addr) {
 	uintmax_t newrefcount = __atomic_sub_fetch(&page->refcount, 1, __ATOMIC_SEQ_CST);
 	if (newrefcount == 0) {
 		__assert((page->flags & PAGE_FLAGS_DIRTY) == 0);
-		MUTEX_ACQUIRE(&freelistmutex, false);
+		MUTEX_ACQUIRE(&freelistmutex);
 		insertinfreelist(page);
 		if (page->backing == NULL)
 			page->flags |= PAGE_FLAGS_FREE;
@@ -160,7 +160,7 @@ static void doalloc(page_t *page) {
 
 void *pmm_allocpage(int section) {
 	retry:
-	MUTEX_ACQUIRE(&freelistmutex, false);
+	MUTEX_ACQUIRE(&freelistmutex);
 	page_t *page = NULL;
 
 	// try to take a free anonymous page
@@ -274,7 +274,7 @@ void *pmm_alloc(size_t size, int section) {
 	if (size == 1)
 		return pmm_allocpage(section);
 
-	MUTEX_ACQUIRE(&freelistmutex, false);
+	MUTEX_ACQUIRE(&freelistmutex);
 
 	uintmax_t page = 0;
 	size_t found = 0;

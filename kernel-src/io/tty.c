@@ -119,7 +119,7 @@ void tty_process(tty_t *tty, char c) {
 			flush = true;
 
 		if (flush) {
-			MUTEX_ACQUIRE(&tty->readmutex, false);
+			MUTEX_ACQUIRE(&tty->readmutex);
 
 			ringbuffer_write(&tty->readbuffer, tty->devicebuffer, tty->devicepos);
 
@@ -134,7 +134,7 @@ void tty_process(tty_t *tty, char c) {
 		if (echoc)
 			tty->writetodevice(tty->deviceinternal, &c, 1);
 
-		MUTEX_ACQUIRE(&tty->readmutex, false);
+		MUTEX_ACQUIRE(&tty->readmutex);
 
 		ringbuffer_write(&tty->readbuffer, &c, 1);
 		poll_event(&tty->pollheader, POLLIN);
@@ -157,7 +157,7 @@ static int internalpoll(tty_t *tty, polldata_t *data, int events) {
 	if (events & POLLOUT)
 		revents |= POLLOUT;
 
-	MUTEX_ACQUIRE(&tty->readmutex, false);
+	MUTEX_ACQUIRE(&tty->readmutex);
 
 	if ((events & POLLIN) && RINGBUFFER_DATACOUNT(&tty->readbuffer))
 		revents |= POLLIN;
@@ -193,7 +193,7 @@ static int read(int minor, iovec_iterator_t *iovec_iterator, size_t size, uintma
 
 	// read data and if theres nothing just return
 	if (min == 0 && time == 0) {
-		MUTEX_ACQUIRE(&tty->readmutex, false);
+		MUTEX_ACQUIRE(&tty->readmutex);
 		*readc = iovec_iterator_read_from_ringbuffer(iovec_iterator, &tty->readbuffer, size);
 
 		int error = 0;
@@ -225,7 +225,7 @@ static int read(int minor, iovec_iterator_t *iovec_iterator, size_t size, uintma
 
 		if (revents) {
 			// theres data to read
-			MUTEX_ACQUIRE(&tty->readmutex, false);
+			MUTEX_ACQUIRE(&tty->readmutex);
 
 			size_t actuallyread = iovec_iterator_read_from_ringbuffer(iovec_iterator, &tty->readbuffer, spaceleft);
 
@@ -414,7 +414,7 @@ static int open(int minor, vnode_t **vnode, int flags) {
 }
 
 static int allocminor(tty_t *tty) {
-	MUTEX_ACQUIRE(&listmutex, false);
+	MUTEX_ACQUIRE(&listmutex);
 
 	int i;
 	for (i = 0; i < TTY_MAX_COUNT; ++i) {
@@ -429,7 +429,7 @@ static int allocminor(tty_t *tty) {
 }
 
 static void freeminor(int minor) {
-	MUTEX_ACQUIRE(&listmutex, false);
+	MUTEX_ACQUIRE(&listmutex);
 	__assert(ttylist[minor]);
 	ttylist[minor] = NULL;
 	MUTEX_RELEASE(&listmutex);

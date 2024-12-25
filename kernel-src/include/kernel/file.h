@@ -30,7 +30,7 @@ int fd_setflags(int fd, int flags);
 int fd_getflags(int fd, int *flags);
 int fd_insert(file_t *file, int *fdp);
 
-#define FILE_LOCK(x) MUTEX_ACQUIRE(&(x)->mutex, false)
+#define FILE_LOCK(x) MUTEX_ACQUIRE(&(x)->mutex)
 #define FILE_UNLOCK(x) MUTEX_RELEASE(&(x)->mutex)
 
 #define FILE_READ 1

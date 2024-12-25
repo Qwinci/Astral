@@ -150,12 +150,12 @@ static int internalpoll(socket_t *socket, polldata_t *data, int events) {
 int localsock_poll(socket_t *socket, polldata_t *data, int events) {
 	localsocket_t *localsocket = (localsocket_t *)socket;
 
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	if (localsocket->binding)
-		MUTEX_ACQUIRE(&localsocket->binding->mutex, false);
+		MUTEX_ACQUIRE(&localsocket->binding->mutex);
 
 	if (localsocket->pair)
-		MUTEX_ACQUIRE(&localsocket->pair->mutex, false);
+		MUTEX_ACQUIRE(&localsocket->pair->mutex);
 
 	int revents = internalpoll(socket, data, events);
 
@@ -308,7 +308,7 @@ static int recvctrl(socket_t *socket, sockctrl_t *ctrl, size_t len, bool *trunca
 
 static int localsock_send(socket_t *socket, sockdesc_t *sockdesc) {
 	localsocket_t *localsocket = (localsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	int error;
 
 	localpair_t *pair = localsocket->pair;
@@ -318,7 +318,7 @@ static int localsock_send(socket_t *socket, sockdesc_t *sockdesc) {
 		goto leave;
 	}
 
-	MUTEX_ACQUIRE(&pair->mutex, false);
+	MUTEX_ACQUIRE(&pair->mutex);
 
 	// check/wait for space
 	for (;;) {
@@ -349,7 +349,7 @@ static int localsock_send(socket_t *socket, sockdesc_t *sockdesc) {
 		poll_leave(&desc);
 		poll_destroydesc(&desc);
 
-		MUTEX_ACQUIRE(&pair->mutex, false);
+		MUTEX_ACQUIRE(&pair->mutex);
 		if (error)
 			goto leave;
 	}
@@ -393,7 +393,7 @@ static int localsock_recv(socket_t *socket, sockdesc_t *sockdesc) {
 	localsocket_t *localsocket = (localsocket_t *)socket;
 	uintmax_t flags = sockdesc->flags;
 	sockdesc->flags = 0;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	int error;
 
 	localpair_t *pair = localsocket->pair;
@@ -403,7 +403,7 @@ static int localsock_recv(socket_t *socket, sockdesc_t *sockdesc) {
 		goto leave;
 	}
 
-	MUTEX_ACQUIRE(&pair->mutex, false);
+	MUTEX_ACQUIRE(&pair->mutex);
 
 	// check/wait for data
 	for (;;) {
@@ -440,7 +440,7 @@ static int localsock_recv(socket_t *socket, sockdesc_t *sockdesc) {
 		poll_leave(&desc);
 		poll_destroydesc(&desc);
 
-		MUTEX_ACQUIRE(&pair->mutex, false);
+		MUTEX_ACQUIRE(&pair->mutex);
 		if (error)
 			goto leave;
 	}
@@ -499,7 +499,7 @@ static int localsock_accept(socket_t *_server, socket_t *_clientconnection, sock
 	localsocket_t *server = (localsocket_t *)_server;
 	localsocket_t *clientconnection = (localsocket_t *)_clientconnection;
 
-	MUTEX_ACQUIRE(&server->socket.mutex, false);
+	MUTEX_ACQUIRE(&server->socket.mutex);
 	binding_t *binding = server->binding;
 	int error;
 
@@ -508,7 +508,7 @@ static int localsock_accept(socket_t *_server, socket_t *_clientconnection, sock
 		goto leave;
 	}
 
-	MUTEX_ACQUIRE(&server->binding->mutex, false);
+	MUTEX_ACQUIRE(&server->binding->mutex);
 
 	if (server->backlog == NULL) {
 		error = EINVAL;
@@ -533,7 +533,7 @@ static int localsock_accept(socket_t *_server, socket_t *_clientconnection, sock
 			poll_destroydesc(&desc);
 
 			pair = popbacklog(server);
-			MUTEX_ACQUIRE(&pair->mutex, false);
+			MUTEX_ACQUIRE(&pair->mutex);
 			if (pair->client == NULL) {
 				// client closed the connection, delete the pair and keep trying
 				free(pair);
@@ -559,7 +559,7 @@ static int localsock_accept(socket_t *_server, socket_t *_clientconnection, sock
 		if (error)
 			goto leave;
 
-		MUTEX_ACQUIRE(&binding->mutex, false);
+		MUTEX_ACQUIRE(&binding->mutex);
 	}
 
 	// we have a valid pair and we have acquired the mutex already
@@ -588,7 +588,7 @@ static int localsock_connect(socket_t *socket, sockaddr_t *addr, uintmax_t flags
 	vnode_t *result = NULL;
 	binding_t *binding = NULL;
 
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	// listening/bound socket
 	if (localsocket->backlog || localsocket->binding) {
 		error = EOPNOTSUPP;
@@ -633,7 +633,7 @@ static int localsock_connect(socket_t *socket, sockaddr_t *addr, uintmax_t flags
 	}
 
 	// and if the server has not closed the socket and is listening
-	MUTEX_ACQUIRE(&binding->mutex, false);
+	MUTEX_ACQUIRE(&binding->mutex);
 	localsocket_t *server = binding->server;
 	if (server == NULL || server->backlog == NULL) {
 		error = ECONNREFUSED;
@@ -676,7 +676,7 @@ static int localsock_connect(socket_t *socket, sockaddr_t *addr, uintmax_t flags
 		if (error)
 			goto leave;
 
-		MUTEX_ACQUIRE(&binding->mutex, false);
+		MUTEX_ACQUIRE(&binding->mutex);
 		if (binding->server == NULL) {
 			// server closed while we waited!
 			// release the vnode so it can get deleted and set the binding to NULL as we can't be sure on its state anymore.
@@ -697,7 +697,7 @@ static int localsock_connect(socket_t *socket, sockaddr_t *addr, uintmax_t flags
 	pair->server = server;
 	pair->client = localsocket;
 	MUTEX_INIT(&pair->mutex);
-	MUTEX_ACQUIRE(&pair->mutex, false);
+	MUTEX_ACQUIRE(&pair->mutex);
 
 	pushbacklog(server, pair);
 
@@ -756,7 +756,7 @@ static int localsock_connect(socket_t *socket, sockaddr_t *addr, uintmax_t flags
 
 static int localsock_listen(socket_t *socket, int backlogsize) {
 	localsocket_t *localsocket = (localsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	
 	int error = 0;
 	// already listening
@@ -769,7 +769,7 @@ static int localsock_listen(socket_t *socket, int backlogsize) {
 		goto leave;
 	}
 
-	MUTEX_ACQUIRE(&localsocket->binding->mutex, false);
+	MUTEX_ACQUIRE(&localsocket->binding->mutex);
 
 	localsocket->backlog = alloc(backlogsize * sizeof(localpair_t *));
 	if (localsocket->backlog == NULL) {
@@ -793,7 +793,7 @@ static void localsock_destroy(socket_t *socket) {
 	// disconnect the socket (connected/connecting sockets)
 	localpair_t *pair = localsocket->pair;
 	if (localsocket->pair) {
-		MUTEX_ACQUIRE(&pair->mutex, false);
+		MUTEX_ACQUIRE(&pair->mutex);
 		localsocket_t **peerp;
 		localsocket_t **ourp;
 
@@ -818,7 +818,7 @@ static void localsock_destroy(socket_t *socket) {
 	// leave binding (bound socket)
 	binding_t *binding = localsocket->binding;
 	if (binding) {
-		MUTEX_ACQUIRE(&binding->mutex, false);
+		MUTEX_ACQUIRE(&binding->mutex);
 		__assert(binding->vnode);
 		binding->server = NULL;
 		MUTEX_RELEASE(&binding->mutex);
@@ -832,7 +832,7 @@ static void localsock_destroy(socket_t *socket) {
 			if (pair == NULL)
 				continue;
 
-			MUTEX_ACQUIRE(&pair->mutex, false);
+			MUTEX_ACQUIRE(&pair->mutex);
 			if (pair->client == NULL) {
 				// client gave up
 				free(pair);
@@ -866,7 +866,7 @@ static void localsock_destroy(socket_t *socket) {
 }
 
 static int localsock_bind(socket_t *socket, sockaddr_t *addr, cred_t *cred) {
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	int error;
 	char *path = NULL;
 	vnode_t *refnode = NULL;
@@ -924,11 +924,11 @@ static int localsock_bind(socket_t *socket, sockaddr_t *addr, cred_t *cred) {
 static size_t localsocket_datacount(socket_t *socket) {
 	localsocket_t *localsocket = (localsocket_t *)socket;
 	size_t nbytes = 0;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	if (localsocket->pair == NULL) 
 		goto cleanup;
 
-	MUTEX_ACQUIRE(&localsocket->pair->mutex, false);
+	MUTEX_ACQUIRE(&localsocket->pair->mutex);
 	nbytes = RINGBUFFER_DATACOUNT(&localsocket->ringbuffer);
 	MUTEX_RELEASE(&localsocket->pair->mutex);
 
@@ -940,7 +940,7 @@ static size_t localsocket_datacount(socket_t *socket) {
 // only called on vnode remove (vfs_inactive)
 void localsock_leavebinding(vnode_t *vnode) {
 	binding_t *binding = vnode->socketbinding;
-	MUTEX_ACQUIRE(&binding->mutex, false);
+	MUTEX_ACQUIRE(&binding->mutex);
 	if (binding->server) {
 		// server socket still exists, so don't free the structure and only remove the vnode pointer from it
 		binding->vnode = NULL;
@@ -985,7 +985,7 @@ int localsock_pair(socket_t **ret1, socket_t **ret2) {
 
 static int localsock_getname(socket_t *socket, sockaddr_t *addr) {
 	localsocket_t *localsocket = (localsocket_t *)socket;
-	MUTEX_ACQUIRE(&socket->mutex, false);
+	MUTEX_ACQUIRE(&socket->mutex);
 	if (localsocket->bindpath)
 		strcpy(addr->path, localsocket->bindpath);
 	else

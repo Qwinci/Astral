@@ -21,7 +21,7 @@ static size_t routingtablesize;
 static routingentry_t getroute(uint32_t ip) {
 	routingentry_t selected = {0};
 
-	MUTEX_ACQUIRE(&routingtablelock, false);
+	MUTEX_ACQUIRE(&routingtablelock);
 
 	for (int i = 0; i < routingtablesize; ++i) {
 		if (routingtable[i].netdev == NULL || (routingtable[i].mask & ip) != (routingtable[i].addr & routingtable[i].mask))
@@ -44,7 +44,7 @@ int ipv4_addroute(netdev_t *netdev, uint32_t addr, uint32_t gateway, uint32_t ma
 		.weight = weight
 	};
 
-	MUTEX_ACQUIRE(&routingtablelock, false);
+	MUTEX_ACQUIRE(&routingtablelock);
 
 	int error = 0;
 	int i;

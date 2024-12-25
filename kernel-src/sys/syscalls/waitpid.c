@@ -21,7 +21,7 @@ syscallret_t syscall_waitpid(context_t *context, pid_t pid, int *status, int opt
 
 	thread_t *thread = current_thread();
 	proc_t *proc = thread->proc;
-	MUTEX_ACQUIRE(&proc->mutex, false);
+	MUTEX_ACQUIRE(&proc->mutex);
 
 	proc_t *prev = NULL;
 	proc_t *iterator = proc->child;
@@ -53,7 +53,7 @@ syscallret_t syscall_waitpid(context_t *context, pid_t pid, int *status, int opt
 				ret.errno = EINTR;
 				return ret;
 			}
-			MUTEX_ACQUIRE(&proc->mutex, false);
+			MUTEX_ACQUIRE(&proc->mutex);
 			prev = NULL;
 			iterator = proc->child;
 			desired = NULL; // set as null to be certain another thread didn't get it

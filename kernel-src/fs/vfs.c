@@ -243,7 +243,7 @@ int vfs_write_iovec(vnode_t *node, iovec_iterator_t *iovec_iterator, size_t size
 			goto leave;
 		}
 
-		MUTEX_ACQUIRE(&node->size_lock, false);
+		MUTEX_ACQUIRE(&node->size_lock);
 
 		vattr_t attr;
 		VOP_LOCK(node);
@@ -365,7 +365,7 @@ int vfs_read_iovec(vnode_t *node, iovec_iterator_t *iovec_iterator, size_t size,
 
 		size_t nodesize = 0;
 
-		MUTEX_ACQUIRE(&node->size_lock, false);
+		MUTEX_ACQUIRE(&node->size_lock);
 		if (node->type == V_TYPE_REGULAR) {
 			vattr_t attr;
 			VOP_LOCK(node);
@@ -837,7 +837,7 @@ int vfs_lookup(vnode_t **result, vnode_t *start, char *path, char *lastcomp, int
 			vnode_t *derefstart = current;
 
 			if (*linkderef == '/' && current_thread() && current_thread()->proc) {
-				MUTEX_ACQUIRE(&current_thread()->proc->mutex, false);
+				MUTEX_ACQUIRE(&current_thread()->proc->mutex);
 				derefstart = current_thread()->proc->root;
 				VOP_HOLD(derefstart);
 				MUTEX_RELEASE(&current_thread()->proc->mutex);

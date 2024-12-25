@@ -143,7 +143,7 @@ static slab_t *returnobject(scache_t *cache, void *obj) {
 }
 
 void *slab_allocate(scache_t *cache) {
-	MUTEX_ACQUIRE(&cache->mutex, false);
+	MUTEX_ACQUIRE(&cache->mutex);
 	slab_t *slab = NULL;
 	if (cache->partial != NULL)
 		slab = cache->partial;
@@ -192,7 +192,7 @@ void *slab_allocate(scache_t *cache) {
 }
 
 void slab_free(scache_t *cache, void *addr) {
-	MUTEX_ACQUIRE(&cache->mutex, false);
+	MUTEX_ACQUIRE(&cache->mutex);
 
 	slab_t *slab = returnobject(cache, addr);
 	__assert(slab);
@@ -284,7 +284,7 @@ static size_t purge(scache_t *cache, size_t maxcount){
 }
 
 void slab_freecache(scache_t *cache) {
-	MUTEX_ACQUIRE(&cache->mutex, false);
+	MUTEX_ACQUIRE(&cache->mutex);
 	__assert(cache->partial == NULL);
 	__assert(cache->full == NULL);
 

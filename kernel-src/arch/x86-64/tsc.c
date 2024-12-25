@@ -26,7 +26,7 @@ static MUTEX_DEFINE(init_mutex);
 static time_t hz;
 
 static timekeeper_source_info_t *tsc_init(void) {
-	MUTEX_ACQUIRE(&init_mutex, false);
+	MUTEX_ACQUIRE(&init_mutex);
 	__assert(tsc_probe());
 
 	timekeeper_source_info_t *timekeeper_source_info = alloc(sizeof(timekeeper_source_info_t));
