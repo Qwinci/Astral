@@ -423,7 +423,7 @@ void signal_signalproc(struct proc_t *proc, int signal) {
 }
 
 // returns true if should retry check
-bool signal_check(struct thread_t *thread, context_t *context, bool syscall, uint64_t syscallret, uint64_t syscallerrno) {
+bool signal_check(struct thread_t *thread, context_t *context, bool syscall, uint64_t syscallret, uint64_t syscallerrno, bool *need_context_switch) {
 	bool retry = false;
 	proc_t *proc = thread->proc;
 
@@ -563,6 +563,7 @@ bool signal_check(struct thread_t *thread, context_t *context, bool syscall, uin
 		}
 		memcpy(&sigframe.context, context, sizeof(context_t));
 		memcpy(&sigframe.extracontext, &thread->extracontext, sizeof(extracontext_t));
+		arch_sigframe_prepare_mcontext(&sigframe);
 		// TODO siginfo
 
 		if (usercopy_touser(stack, &sigframe, sizeof(sigframe_t))) {
@@ -591,11 +592,13 @@ bool signal_check(struct thread_t *thread, context_t *context, bool syscall, uin
 		CTX_SP(context) = (uint64_t)stack;
 		CTX_ARG0(context) = signal;
 		CTX_ARG1(context) = 0; // TODO pass siginfo
-		CTX_ARG2(context) = 0; // TODO ucontext
+		CTX_ARG2(context) = (uint64_t)ARCH_SIGFRAME_GET_UCONTEXT_POINTER((sigframe_t*)stack);
 
 		// reset handler if asked for
 		if (action->flags & SA_RESETHAND)
 			memset(action, 0, sizeof(sigaction_t));
+
+		*need_context_switch = true;
 	}
 
 	leave:

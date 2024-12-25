@@ -162,7 +162,7 @@ typedef struct {
 } checkargs_t;
 
 // SHOULD NOT BE CALLED WITH THE SCHEDULER STACK
-static void userspacecheck(void *_args) {
+static bool userspacecheck(void *_args) {
 	checkargs_t *args = _args;
 	thread_t *thread = current_thread();
 
@@ -171,7 +171,10 @@ static void userspacecheck(void *_args) {
 		sched_threadexit();
 	}
 
-	while (signal_check(thread, args->context, args->syscall, args->syscallret, args->syscallerrno)) ;
+	bool need_context_switch = false;
+
+	while (signal_check(thread, args->context, args->syscall, args->syscallret, args->syscallerrno, &need_context_switch)) ;
+	return need_context_switch;
 }
 
 static void checktrampoline(context_t *context, void *_args) {
@@ -203,7 +206,10 @@ __attribute__((no_caller_saved_registers)) void sched_userspacecheck(context_t *
 	if (&args < (checkargs_t *)current_cpu()->schedulerstack && &args >= (checkargs_t *)((uintptr_t)current_cpu()->schedulerstack - SCHEDULER_STACK_SIZE)) {
 		arch_context_saveandcall(checktrampoline, current_thread()->kernelstacktop, &args);
 	} else {
-		userspacecheck(&args);
+		if (userspacecheck(&args)) {
+			// need context switch
+			arch_context_switch(context);
+		}
 	}
 
 	current_cpu()->intstatus = intstatus;

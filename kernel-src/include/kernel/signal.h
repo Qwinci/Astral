@@ -161,7 +161,7 @@ void signal_signalthread(struct thread_t *thread, int signal, bool urgent);
 void signal_pending(struct thread_t *, sigset_t *sigset);
 void signal_suspend(sigset_t *sigset);
 int signal_wait(sigset_t *sigset, timespec_t *timeout, siginfo_t *siginfo, int *signum);
-bool signal_check(struct thread_t *thread, context_t *context, bool syscall, uint64_t syscallret, uint64_t syscallerrno);
+bool signal_check(struct thread_t *thread, context_t *context, bool syscall, uint64_t syscallret, uint64_t syscallerrno, bool *need_context_switch);
 extern int signal_defaultactions[NSIG];
 
 #endif
