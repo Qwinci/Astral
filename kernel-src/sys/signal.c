@@ -563,8 +563,10 @@ bool signal_check(struct thread_t *thread, context_t *context, bool syscall, uin
 		}
 		memcpy(&sigframe.context, context, sizeof(context_t));
 		memcpy(&sigframe.extracontext, &thread->extracontext, sizeof(extracontext_t));
+
 		arch_sigframe_prepare_mcontext(&sigframe);
-		// TODO siginfo
+
+		memset(&sigframe.siginfo, 0, sizeof(siginfo_t));
 
 		if (usercopy_touser(stack, &sigframe, sizeof(sigframe_t))) {
 			printf("signal: bad user stack %p\n", stack);
@@ -591,8 +593,8 @@ bool signal_check(struct thread_t *thread, context_t *context, bool syscall, uin
 		CTX_IP(context) = (uint64_t)action->address;
 		CTX_SP(context) = (uint64_t)stack;
 		CTX_ARG0(context) = signal;
-		CTX_ARG1(context) = 0; // TODO pass siginfo
-		CTX_ARG2(context) = (uint64_t)ARCH_SIGFRAME_GET_UCONTEXT_POINTER((sigframe_t*)stack);
+		CTX_ARG1(context) = (uint64_t)&((sigframe_t *)stack)->siginfo;
+		CTX_ARG2(context) = (uint64_t)ARCH_SIGFRAME_GET_UCONTEXT_POINTER((sigframe_t *)stack);
 
 		// reset handler if asked for
 		if (action->flags & SA_RESETHAND)
