@@ -93,5 +93,35 @@ static inline void arch_sigframe_prepare_mcontext(sigframe_t *sigframe) {
 	memcpy(fpu_state, extracontext->fx, 512);
 }
 
+static inline void arch_sigframe_get_context_from_mcontext(sigframe_t *sigframe) {
+	context_t *context = &sigframe->context;
+	extracontext_t *extracontext = &sigframe->extracontext;
+	unsigned long *gregs = sigframe->mcontext.gregs;
+	uint8_t *fpu_state = sigframe->mcontext.fpu_state;
+
+	context->r8 = gregs[MCONTEXT_REG_R8];
+	context->r9 = gregs[MCONTEXT_REG_R9];
+	context->r10 = gregs[MCONTEXT_REG_R10];
+	context->r11 = gregs[MCONTEXT_REG_R11];
+	context->r12 = gregs[MCONTEXT_REG_R12];
+	context->r13 = gregs[MCONTEXT_REG_R13];
+	context->r14 = gregs[MCONTEXT_REG_R14];
+	context->r15 = gregs[MCONTEXT_REG_R15];
+	context->rdi = gregs[MCONTEXT_REG_RDI];
+	context->rsi = gregs[MCONTEXT_REG_RSI];
+	context->rbp = gregs[MCONTEXT_REG_RBP];
+	context->rbx = gregs[MCONTEXT_REG_RBX];
+	context->rdx = gregs[MCONTEXT_REG_RDX];
+	context->rax = gregs[MCONTEXT_REG_RAX];
+	context->rcx = gregs[MCONTEXT_REG_RCX];
+	context->rsp = gregs[MCONTEXT_REG_RSP];
+	context->rip = gregs[MCONTEXT_REG_RIP];
+	context->rflags = gregs[MCONTEXT_REG_EFL];
+	context->error = gregs[MCONTEXT_REG_ERR];
+	context->cr2 = gregs[MCONTEXT_REG_CR2];
+
+	memcpy(extracontext->fx, fpu_state, 512);
+}
+
 
 #endif
