@@ -153,6 +153,10 @@ int elf_load(vnode_t *vnode, void *base, void **entry, char **interpreter, auxv6
 	if (headerok(&header) == false)
 		return ENOEXEC;
 
+	if (!base && header.type == ELF_SHARED) {
+		base = (void *)0x400000;
+	}
+
 	auxv64->null.type = AT_NULL;
 	auxv64->phdr.type = AT_PHDR;
 	auxv64->phnum.type = AT_PHNUM;
@@ -161,7 +165,7 @@ int elf_load(vnode_t *vnode, void *base, void **entry, char **interpreter, auxv6
 	
 	auxv64->phnum.val = header.phcount;
 	auxv64->phent.val = header.phsize;
-	auxv64->entry.val = header.entry;
+	auxv64->entry.val = header.entry + (uintptr_t)base;
 	*entry = (void *)(header.entry + (uintptr_t)base);
 
 	__assert(header.phsize == sizeof(elfph64_t));
